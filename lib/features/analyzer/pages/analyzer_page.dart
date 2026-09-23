@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_state.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
@@ -98,9 +97,11 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
     final cubit = context.read<AnalyzerCubit>();
     final langCode = Localizations.localeOf(context).languageCode;
 
+    final l10n = AppLocalizations.of(context)!;
+
     // After capture announce: "Analyzing image, please wait"
     // ignore: deprecated_member_use
-    SemanticsService.announce('Analyzing image, please wait', Directionality.of(context));
+    SemanticsService.announce(l10n.analyzingImagePleaseWait, Directionality.of(context));
 
     if (_cameraController != null && _cameraController!.value.isInitialized) {
       try {
@@ -110,7 +111,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to capture photo: $e')),
+          SnackBar(content: Text(l10n.failedToCapturePhoto(e.toString()))),
         );
       }
     } else {
@@ -133,31 +134,26 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
           l10n.analyzerScreenTitle,
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: LanguageToggleButton(),
-          ),
-        ],
       ),
       body: BlocConsumer<AnalyzerCubit, AnalyzerState>(
         listener: (context, state) {
           if (state is AnalyzerProcessing) {
             // TalkBack announcement when processing begins
             // ignore: deprecated_member_use
-            SemanticsService.announce('processing', Directionality.of(context));
+            SemanticsService.announce(l10n.processingAnnouncement, Directionality.of(context));
           } else if (state is AnalyzerError) {
             HapticFeedback.heavyImpact().catchError((_) {});
+            final localizedMsg = state.getLocalizedMessage(l10n);
             // TalkBack announcement for screen readers
             // ignore: deprecated_member_use
-            SemanticsService.announce(state.message, Directionality.of(context));
+            SemanticsService.announce(localizedMsg, Directionality.of(context));
 
             // Display simple, accessible error pop-up dialog
-            _showErrorPopup(context, state.message, state.failedImagePath, langCode, l10n);
+            _showErrorPopup(context, localizedMsg, state.failedImagePath, langCode, l10n);
           } else if (state is AnalyzerResult) {
             HapticFeedback.lightImpact().catchError((_) {});
             final tagsText = state.data.tags.isNotEmpty
-                ? ' ${state.data.tags.map((t) => t.semanticLabel).join('. ')}.'
+                ? ' ${state.data.tags.map((t) => l10n.analyzerTagSemantic(t.label, t.formattedConfidence)).join('. ')}.'
                 : '';
             // ignore: deprecated_member_use
             SemanticsService.announce('${state.description}$tagsText', Directionality.of(context));
@@ -229,7 +225,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                             Semantics(
                               container: true,
                               liveRegion: true,
-                              label: 'processing',
+                              label: l10n.processingSemanticLabel,
                               child: Container(
                                 color: Colors.black.withAlpha(200),
                                 child: Center(
@@ -324,7 +320,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                       runSpacing: 6,
                                       children: state.data.tags.map((tag) {
                                         return Semantics(
-                                          label: tag.semanticLabel,
+                                          label: l10n.analyzerTagSemantic(tag.label, tag.formattedConfidence),
                                           child: Chip(
                                             backgroundColor: Colors.grey.shade100,
                                             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -389,7 +385,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      state.message,
+                                      state.getLocalizedMessage(l10n),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontSize: 15,

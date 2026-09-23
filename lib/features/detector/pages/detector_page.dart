@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/detector/constants/coco_labels.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
 import 'package:vision_companion/features/detector/cubit/detector_state.dart';
@@ -190,12 +189,6 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
           l10n.detectorScreenTitle,
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: LanguageToggleButton(),
-          ),
-        ],
       ),
       body: BlocConsumer<DetectorCubit, DetectorState>(
         listener: (context, state) {
@@ -233,7 +226,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
           } else if (isIdle) {
             statusText = l10n.detectorReadyStatus;
           } else {
-            statusText = 'Error';
+            statusText = l10n.statusError;
           }
 
           return Padding(

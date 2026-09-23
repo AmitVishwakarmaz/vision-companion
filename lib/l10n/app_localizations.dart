@@ -284,23 +284,29 @@ abstract class AppLocalizations {
   /// **'Ready to detect'**
   String get detectorReadyStatus;
 
-  /// HUD count of detected objects
+  /// HUD count of detected objects with ICU plural
   ///
   /// In en, this message translates to:
-  /// **'{count} objects detected'**
-  String detectorObjectsCount(int count);
+  /// **'{count, plural, =0{No objects detected} =1{1 object detected} other{{count} objects detected}}'**
+  String detectorObjectsCount(num count);
 
-  /// HUD count with latency in milliseconds
+  /// HUD count with latency in milliseconds with ICU plural
   ///
   /// In en, this message translates to:
-  /// **'{count} objects | {latency}ms'**
-  String detectorObjectsCountWithLatency(int count, int latency);
+  /// **'{count, plural, =1{1 object | {latency}ms} other{{count} objects | {latency}ms}}'**
+  String detectorObjectsCountWithLatency(num count, int latency);
 
-  /// HUD status text when detection is paused with saved count
+  /// HUD status text when detection is paused with saved count with ICU plural
   ///
   /// In en, this message translates to:
-  /// **'Detection paused ({count} saved)'**
-  String detectorPausedWithCount(int count);
+  /// **'{count, plural, =0{Detection paused (0 saved)} =1{Detection paused (1 saved)} other{Detection paused ({count} saved)}}'**
+  String detectorPausedWithCount(num count);
+
+  /// Action button text based on detector state with ICU select
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, running{Pause detection} paused{Resume detection} other{Start Detection}}'**
+  String detectorActionSelect(String state);
 
   /// Error message when no camera is found
   ///
@@ -344,6 +350,24 @@ abstract class AppLocalizations {
   /// **'Analyzing image with AI...'**
   String get analyzingProgress;
 
+  /// TalkBack announcement after photo capture
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing image, please wait'**
+  String get analyzingImagePleaseWait;
+
+  /// TalkBack announcement when analyzer enters processing state
+  ///
+  /// In en, this message translates to:
+  /// **'processing'**
+  String get processingAnnouncement;
+
+  /// Semantic accessibility label for processing live region
+  ///
+  /// In en, this message translates to:
+  /// **'processing'**
+  String get processingSemanticLabel;
+
   /// Button to retry a failed operation
   ///
   /// In en, this message translates to:
@@ -380,6 +404,18 @@ abstract class AppLocalizations {
   /// **'Retry analyzing the photo'**
   String get retryButtonSemantic;
 
+  /// Accessibility label for tag chip with confidence
+  ///
+  /// In en, this message translates to:
+  /// **'Tag: {tag}, {confidence} confidence'**
+  String analyzerTagSemantic(String tag, String confidence);
+
+  /// Count of identified tags with ICU plural
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No tags identified} =1{1 tag identified} other{{count} tags identified}}'**
+  String analyzerTagsCount(num count);
+
   /// Title for accessible error popup dialog
   ///
   /// In en, this message translates to:
@@ -391,6 +427,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismiss'**
   String get errorDialogDismiss;
+
+  /// Status text for error state
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get statusError;
+
+  /// Error message when network is unreachable
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to analyze image. Please check your internet connection and try again.'**
+  String get analyzerErrorNetwork;
+
+  /// Generic error message when analysis fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to analyze image. Please try again.'**
+  String get analyzerErrorGeneric;
+
+  /// Error message when API key is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API key not found. Please add GEMINI_API_KEY to your .env file.'**
+  String get analyzerErrorApiKey;
+
+  /// Snackbar error message when camera capture fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to capture photo: {error}'**
+  String failedToCapturePhoto(String error);
 
   /// Title for settings screen
   ///
@@ -413,8 +479,32 @@ abstract class AppLocalizations {
   /// Hindi language option
   ///
   /// In en, this message translates to:
-  /// **'हिंदी (Hindi)'**
+  /// **'हिन्दी (Hindi)'**
   String get languageHindi;
+
+  /// Subtitle describing English language option
+  ///
+  /// In en, this message translates to:
+  /// **'Default language'**
+  String get englishLanguageSubtitle;
+
+  /// Subtitle describing Hindi language option
+  ///
+  /// In en, this message translates to:
+  /// **'National language of India'**
+  String get hindiLanguageSubtitle;
+
+  /// Accessibility hint to select English
+  ///
+  /// In en, this message translates to:
+  /// **'English, tap to select English'**
+  String get selectEnglishSemantic;
+
+  /// Accessibility hint to select Hindi
+  ///
+  /// In en, this message translates to:
+  /// **'Hindi, tap to select Hindi'**
+  String get selectHindiSemantic;
 
   /// Theme setting section title
   ///
@@ -440,6 +530,12 @@ abstract class AppLocalizations {
   /// **'System Default'**
   String get themeSystem;
 
+  /// Theme mode label with ICU select
+  ///
+  /// In en, this message translates to:
+  /// **'{mode, select, system{System Default} light{Light} dark{Dark} other{System Default}}'**
+  String themeModeSelect(String mode);
+
   /// Profile section title
   ///
   /// In en, this message translates to:
@@ -451,6 +547,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest User'**
   String get anonymousUser;
+
+  /// Label indicating user is not logged in
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get notSignedIn;
 
   /// Error message when user is not found
   ///

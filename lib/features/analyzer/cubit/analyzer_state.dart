@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:vision_companion/features/analyzer/models/analysis_data.dart';
+import 'package:vision_companion/l10n/app_localizations.dart';
 
 abstract class AnalyzerState extends Equatable {
   const AnalyzerState();
@@ -53,6 +54,18 @@ class AnalyzerError extends AnalyzerState {
   final String? failedImagePath;
 
   const AnalyzerError(this.message, {this.failedImagePath});
+
+  String getLocalizedMessage(AppLocalizations l10n) {
+    final lower = message.toLowerCase();
+    if (lower.contains('internet') || lower.contains('network') || lower.contains('socket') || lower.contains('timeout')) {
+      return l10n.analyzerErrorNetwork;
+    } else if (lower.contains('api key') || lower.contains('gemini_api_key') || lower.contains('not found')) {
+      return l10n.analyzerErrorApiKey;
+    } else if (lower.contains('unable to analyze')) {
+      return l10n.analyzerErrorGeneric;
+    }
+    return message;
+  }
 
   @override
   List<Object?> get props => [message, failedImagePath];

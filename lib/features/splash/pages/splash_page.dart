@@ -122,12 +122,12 @@ class SplashPage extends StatelessWidget {
 
                           // Option 1: English
                           _LanguageSelectionCard(
-                            title: 'English',
-                            subtitle: 'Default language',
+                            title: l10n.languageEnglish,
+                            subtitle: l10n.englishLanguageSubtitle,
                             isSelected: isEnglish,
                             semanticLabel: isEnglish
-                                ? l10n.languageSelectedSemantic('English')
-                                : 'English, tap to select English',
+                                ? l10n.languageSelectedSemantic(l10n.languageEnglish)
+                                : l10n.selectEnglishSemantic,
                             onTap: () {
                               context
                                   .read<SettingsCubit>()
@@ -138,12 +138,12 @@ class SplashPage extends StatelessWidget {
 
                           // Option 2: Hindi
                           _LanguageSelectionCard(
-                            title: 'हिन्दी (Hindi)',
-                            subtitle: 'भारतीय राष्ट्रभाषा',
+                            title: l10n.languageHindi,
+                            subtitle: l10n.hindiLanguageSubtitle,
                             isSelected: isHindi,
                             semanticLabel: isHindi
-                                ? l10n.languageSelectedSemantic('हिन्दी')
-                                : 'हिन्दी, हिन्दी चुनने के लिए टैप करें',
+                                ? l10n.languageSelectedSemantic(l10n.languageHindi)
+                                : l10n.selectHindiSemantic,
                             onTap: () {
                               context
                                   .read<SettingsCubit>()

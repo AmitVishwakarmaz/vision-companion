@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
 import 'package:vision_companion/core/di/injection_container.dart';
-import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/history/repositories/history_repository.dart';
@@ -132,7 +131,36 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // Settings Button
+                Semantics(
+                  button: true,
+                  label: l10n.settingsTitle,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black, width: 1.5),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.settings_outlined, size: 20),
+                      label: Text(
+                        l10n.settingsTitle,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () {
+                        Navigator.of(bottomSheetContext).pop();
+                        context.push(AppConstants.routeSettings);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
 
                 // Sign Out Button
                 Semantics(
@@ -198,7 +226,17 @@ class HomeScreen extends StatelessWidget {
               child: Text(l10n.appTitle),
             ),
             actions: [
-              const LanguageToggleButton(),
+              // Settings Button
+              Semantics(
+                label: l10n.settingsTitle,
+                button: true,
+                child: IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: l10n.settingsTitle,
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  onPressed: () => context.push(AppConstants.routeSettings),
+                ),
+              ),
               const SizedBox(width: 4),
               // Profile Avatar Button
               Padding(

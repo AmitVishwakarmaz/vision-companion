@@ -130,33 +130,45 @@
   "@detectorReadyStatus": {
     "description": "Status text when detection is ready"
   },
-  "detectorObjectsCount": "{count} objects detected",
+  "detectorObjectsCount": "{count, plural, =0{No objects detected} =1{1 object detected} other{{count} objects detected}}",
   "@detectorObjectsCount": {
-    "description": "HUD count of detected objects",
+    "description": "HUD count of detected objects with ICU plural",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "num",
+        "format": "compact"
       }
     }
   },
-  "detectorObjectsCountWithLatency": "{count} objects | {latency}ms",
+  "detectorObjectsCountWithLatency": "{count, plural, =1{1 object | {latency}ms} other{{count} objects | {latency}ms}}",
   "@detectorObjectsCountWithLatency": {
-    "description": "HUD count with latency in milliseconds",
+    "description": "HUD count with latency in milliseconds with ICU plural",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "num",
+        "format": "compact"
       },
       "latency": {
         "type": "int"
       }
     }
   },
-  "detectorPausedWithCount": "Detection paused ({count} saved)",
+  "detectorPausedWithCount": "{count, plural, =0{Detection paused (0 saved)} =1{Detection paused (1 saved)} other{Detection paused ({count} saved)}}",
   "@detectorPausedWithCount": {
-    "description": "HUD status text when detection is paused with saved count",
+    "description": "HUD status text when detection is paused with saved count with ICU plural",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "detectorActionSelect": "{state, select, running{Pause detection} paused{Resume detection} other{Start Detection}}",
+  "@detectorActionSelect": {
+    "description": "Action button text based on detector state with ICU select",
+    "placeholders": {
+      "state": {
+        "type": "String"
       }
     }
   },
@@ -193,6 +205,18 @@
   "@analyzingProgress": {
     "description": "Progress message while analyzing image"
   },
+  "analyzingImagePleaseWait": "Analyzing image, please wait",
+  "@analyzingImagePleaseWait": {
+    "description": "TalkBack announcement after photo capture"
+  },
+  "processingAnnouncement": "processing",
+  "@processingAnnouncement": {
+    "description": "TalkBack announcement when analyzer enters processing state"
+  },
+  "processingSemanticLabel": "processing",
+  "@processingSemanticLabel": {
+    "description": "Semantic accessibility label for processing live region"
+  },
   "retryButton": "Retry",
   "@retryButton": {
     "description": "Button to retry a failed operation"
@@ -217,6 +241,28 @@
   "@retryButtonSemantic": {
     "description": "Accessibility label for retry button"
   },
+  "analyzerTagSemantic": "Tag: {tag}, {confidence} confidence",
+  "@analyzerTagSemantic": {
+    "description": "Accessibility label for tag chip with confidence",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      },
+      "confidence": {
+        "type": "String"
+      }
+    }
+  },
+  "analyzerTagsCount": "{count, plural, =0{No tags identified} =1{1 tag identified} other{{count} tags identified}}",
+  "@analyzerTagsCount": {
+    "description": "Count of identified tags with ICU plural",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
   "errorDialogTitle": "Notice",
   "@errorDialogTitle": {
     "description": "Title for accessible error popup dialog"
@@ -224,6 +270,31 @@
   "errorDialogDismiss": "Dismiss",
   "@errorDialogDismiss": {
     "description": "Button to dismiss the error dialog"
+  },
+  "statusError": "Error",
+  "@statusError": {
+    "description": "Status text for error state"
+  },
+  "analyzerErrorNetwork": "Unable to analyze image. Please check your internet connection and try again.",
+  "@analyzerErrorNetwork": {
+    "description": "Error message when network is unreachable"
+  },
+  "analyzerErrorGeneric": "Unable to analyze image. Please try again.",
+  "@analyzerErrorGeneric": {
+    "description": "Generic error message when analysis fails"
+  },
+  "analyzerErrorApiKey": "Gemini API key not found. Please add GEMINI_API_KEY to your .env file.",
+  "@analyzerErrorApiKey": {
+    "description": "Error message when API key is missing"
+  },
+  "failedToCapturePhoto": "Failed to capture photo: {error}",
+  "@failedToCapturePhoto": {
+    "description": "Snackbar error message when camera capture fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "settingsTitle": "Settings",
   "@settingsTitle": {
@@ -237,9 +308,25 @@
   "@languageEnglish": {
     "description": "English language option"
   },
-  "languageHindi": "हिंदी (Hindi)",
+  "languageHindi": "हिन्दी (Hindi)",
   "@languageHindi": {
     "description": "Hindi language option"
+  },
+  "englishLanguageSubtitle": "Default language",
+  "@englishLanguageSubtitle": {
+    "description": "Subtitle describing English language option"
+  },
+  "hindiLanguageSubtitle": "National language of India",
+  "@hindiLanguageSubtitle": {
+    "description": "Subtitle describing Hindi language option"
+  },
+  "selectEnglishSemantic": "English, tap to select English",
+  "@selectEnglishSemantic": {
+    "description": "Accessibility hint to select English"
+  },
+  "selectHindiSemantic": "Hindi, tap to select Hindi",
+  "@selectHindiSemantic": {
+    "description": "Accessibility hint to select Hindi"
   },
   "themeSetting": "Theme Mode",
   "@themeSetting": {
@@ -257,6 +344,15 @@
   "@themeSystem": {
     "description": "System theme mode"
   },
+  "themeModeSelect": "{mode, select, system{System Default} light{Light} dark{Dark} other{System Default}}",
+  "@themeModeSelect": {
+    "description": "Theme mode label with ICU select",
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "profileSection": "User Profile",
   "@profileSection": {
     "description": "Profile section title"
@@ -264,6 +360,10 @@
   "anonymousUser": "Guest User",
   "@anonymousUser": {
     "description": "Label for unauthenticated or guest user"
+  },
+  "notSignedIn": "Not signed in",
+  "@notSignedIn": {
+    "description": "Label indicating user is not logged in"
   },
   "authErrorUserNotFound": "No user found with this email address.",
   "@authErrorUserNotFound": {

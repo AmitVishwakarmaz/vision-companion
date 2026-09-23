@@ -108,18 +108,63 @@ class AppLocalizationsHi extends AppLocalizations {
   String get detectorReadyStatus => 'डिटेक्ट करने के लिए तैयार';
 
   @override
-  String detectorObjectsCount(int count) {
-    return '$count वस्तुएं संसूचित';
+  String detectorObjectsCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString वस्तुएं संसूचित',
+      one: '1 वस्तु संसूचित',
+      zero: 'कोई वस्तु संसूचित नहीं',
+    );
+    return '$_temp0';
   }
 
   @override
-  String detectorObjectsCountWithLatency(int count, int latency) {
-    return '$count वस्तुएं | ${latency}ms';
+  String detectorObjectsCountWithLatency(num count, int latency) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString वस्तुएं | ${latency}ms',
+      one: '1 वस्तु | ${latency}ms',
+    );
+    return '$_temp0';
   }
 
   @override
-  String detectorPausedWithCount(int count) {
-    return 'डिटेक्शन रुका हुआ ($count सहेजे गए)';
+  String detectorPausedWithCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'डिटेक्शन रुका हुआ ($countString सहेजे गए)',
+      one: 'डिटेक्शन रुका हुआ (1 सहेजा गया)',
+      zero: 'डिटेक्शन रुका हुआ (0 सहेजे गए)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String detectorActionSelect(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'running': 'डिटेक्शन रोकें',
+      'paused': 'डिटेक्शन फिर शुरू करें',
+      'other': 'डिटेक्शन शुरू करें',
+    });
+    return '$_temp0';
   }
 
   @override
@@ -147,6 +192,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get analyzingProgress => 'AI के साथ विश्लेषण किया जा रहा है...';
 
   @override
+  String get analyzingImagePleaseWait =>
+      'छवि का विश्लेषण हो रहा है, कृपया प्रतीक्षा करें';
+
+  @override
+  String get processingAnnouncement => 'प्रोसेसिंग...';
+
+  @override
+  String get processingSemanticLabel => 'प्रोसेसिंग';
+
+  @override
   String get retryButton => 'पुनः प्रयास करें';
 
   @override
@@ -166,10 +221,52 @@ class AppLocalizationsHi extends AppLocalizations {
   String get retryButtonSemantic => 'फोटो का पुनः विश्लेषण करें';
 
   @override
+  String analyzerTagSemantic(String tag, String confidence) {
+    return 'टैग: $tag, $confidence विश्वास';
+  }
+
+  @override
+  String analyzerTagsCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString टैग मिले',
+      one: '1 टैग मिला',
+      zero: 'कोई टैग नहीं मिला',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get errorDialogTitle => 'सूचना';
 
   @override
   String get errorDialogDismiss => 'खारिज करें';
+
+  @override
+  String get statusError => 'त्रुटि';
+
+  @override
+  String get analyzerErrorNetwork =>
+      'छवि का विश्लेषण करने में असमर्थ। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।';
+
+  @override
+  String get analyzerErrorGeneric =>
+      'छवि का विश्लेषण करने में असमर्थ। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get analyzerErrorApiKey =>
+      'Gemini API कुंजी नहीं मिली। कृपया अपने .env फ़ाइल में GEMINI_API_KEY जोड़ें।';
+
+  @override
+  String failedToCapturePhoto(String error) {
+    return 'फोटो खींचने में विफल: $error';
+  }
 
   @override
   String get settingsTitle => 'सेटिंग्स';
@@ -181,7 +278,20 @@ class AppLocalizationsHi extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
-  String get languageHindi => 'हिंदी (Hindi)';
+  String get languageHindi => 'हिन्दी (Hindi)';
+
+  @override
+  String get englishLanguageSubtitle => 'डिफ़ॉल्ट भाषा';
+
+  @override
+  String get hindiLanguageSubtitle => 'भारतीय राजभाषा';
+
+  @override
+  String get selectEnglishSemantic =>
+      'अंग्रेज़ी, अंग्रेज़ी चुनने के लिए टैप करें';
+
+  @override
+  String get selectHindiSemantic => 'हिन्दी, हिन्दी चुनने के लिए टैप करें';
 
   @override
   String get themeSetting => 'थीम मोड';
@@ -196,10 +306,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get themeSystem => 'सिस्टम डिफ़ॉल्ट';
 
   @override
+  String themeModeSelect(String mode) {
+    String _temp0 = intl.Intl.selectLogic(mode, {
+      'system': 'सिस्टम डिफ़ॉल्ट',
+      'light': 'लाइट',
+      'dark': 'डार्क',
+      'other': 'सिस्टम डिफ़ॉल्ट',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get profileSection => 'उपयोगकर्ता प्रोफ़ाइल';
 
   @override
   String get anonymousUser => 'अतिथि उपयोगकर्ता';
+
+  @override
+  String get notSignedIn => 'साइन इन नहीं किया गया';
 
   @override
   String get authErrorUserNotFound =>

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
-import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/auth/widgets/auth_button.dart';
@@ -74,12 +73,6 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: LanguageToggleButton(),
-          ),
-        ],
       ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
