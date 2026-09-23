@@ -1,0 +1,61 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
+import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
+import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
+import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
+
+final GetIt sl = GetIt.instance;
+
+Future<void> initDependencies({
+  SharedPreferences? sharedPreferences,
+  FirebaseAuth? firebaseAuth,
+  FirebaseFirestore? firestore,
+}) async {
+  // External: SharedPreferences
+  final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => prefs);
+
+  // External: Firebase
+  FirebaseAuth? auth = firebaseAuth;
+  if (auth == null) {
+    try {
+      auth = FirebaseAuth.instance;
+    } catch (e) {
+      debugPrint('FirebaseAuth not available or not initialized: $e');
+    }
+  }
+  if (auth != null) {
+    sl.registerLazySingleton<FirebaseAuth>(() => auth!);
+  }
+
+  FirebaseFirestore? db = firestore;
+  if (db == null) {
+    try {
+      db = FirebaseFirestore.instance;
+    } catch (e) {
+      debugPrint('FirebaseFirestore not available or not initialized: $e');
+    }
+  }
+  if (db != null) {
+    sl.registerLazySingleton<FirebaseFirestore>(() => db!);
+  }
+
+  // Feature Cubits
+  sl.registerFactory<SettingsCubit>(
+    () => SettingsCubit(prefs: sl<SharedPreferences>()),
+  );
+
+  sl.registerFactory<AuthCubit>(
+    () => AuthCubit(
+      firebaseAuth: sl.isRegistered<FirebaseAuth>() ? sl<FirebaseAuth>() : null,
+    ),
+  );
+
+  sl.registerFactory<DetectorCubit>(() => DetectorCubit());
+
+  sl.registerFactory<AnalyzerCubit>(() => AnalyzerCubit());
+}

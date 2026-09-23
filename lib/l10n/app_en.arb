@@ -1,0 +1,159 @@
+{
+  "@@locale": "en",
+  "appTitle": "Vision Companion",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "homeTitle": "Home",
+  "@homeTitle": {
+    "description": "Title for home screen"
+  },
+  "welcomeMessage": "Welcome to Vision Companion",
+  "@welcomeMessage": {
+    "description": "Welcome message displayed on the home screen"
+  },
+  "subtitleAssistive": "Empowering assistive visual intelligence",
+  "@subtitleAssistive": {
+    "description": "Subtitle on home screen"
+  },
+  "featureDetectorTitle": "Live Object Detector",
+  "@featureDetectorTitle": {
+    "description": "Title for feature 1"
+  },
+  "featureDetectorDesc": "Real-time on-device object detection using TFLite",
+  "@featureDetectorDesc": {
+    "description": "Description for feature 1"
+  },
+  "featureAnalyzerTitle": "AI Image Analyzer",
+  "@featureAnalyzerTitle": {
+    "description": "Title for feature 2"
+  },
+  "featureAnalyzerDesc": "In-depth visual understanding and scene description via AI",
+  "@featureAnalyzerDesc": {
+    "description": "Description for feature 2"
+  },
+  "featureSettingsTitle": "Settings & Profile",
+  "@featureSettingsTitle": {
+    "description": "Title for settings feature"
+  },
+  "featureSettingsDesc": "Manage language preferences, theme, and profile",
+  "@featureSettingsDesc": {
+    "description": "Description for settings feature"
+  },
+  "loginTitle": "Sign In",
+  "@loginTitle": {
+    "description": "Title for login screen"
+  },
+  "loginSubtitle": "Access your assistive vision assistant",
+  "@loginSubtitle": {
+    "description": "Subtitle for login screen"
+  },
+  "emailLabel": "Email Address",
+  "@emailLabel": {
+    "description": "Label for email field"
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Label for password field"
+  },
+  "emailHint": "Enter your email",
+  "@emailHint": {
+    "description": "Hint for email field"
+  },
+  "passwordHint": "Enter your password",
+  "@passwordHint": {
+    "description": "Hint for password field"
+  },
+  "emailRequired": "Please enter your email",
+  "@emailRequired": {
+    "description": "Validation error for empty email"
+  },
+  "passwordRequired": "Please enter your password",
+  "@passwordRequired": {
+    "description": "Validation error for empty password"
+  },
+  "signInButton": "Sign In",
+  "@signInButton": {
+    "description": "Text for sign in button"
+  },
+  "signInWithGoogle": "Continue with Google",
+  "@signInWithGoogle": {
+    "description": "Text for Google sign in button"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Text for sign out button"
+  },
+  "detectorScreenTitle": "Real-Time Object Detector",
+  "@detectorScreenTitle": {
+    "description": "Title for detector screen"
+  },
+  "detectorPlaceholderMessage": "TFLite Live Camera Feed will stream here",
+  "@detectorPlaceholderMessage": {
+    "description": "Placeholder message for detector screen"
+  },
+  "startDetection": "Start Detection",
+  "@startDetection": {
+    "description": "Button to start detection"
+  },
+  "stopDetection": "Stop Detection",
+  "@stopDetection": {
+    "description": "Button to stop detection"
+  },
+  "analyzerScreenTitle": "AI Scene Analyzer",
+  "@analyzerScreenTitle": {
+    "description": "Title for analyzer screen"
+  },
+  "analyzerPlaceholderMessage": "Capture or choose an image to analyze",
+  "@analyzerPlaceholderMessage": {
+    "description": "Placeholder message for analyzer screen"
+  },
+  "pickImageButton": "Pick from Gallery",
+  "@pickImageButton": {
+    "description": "Button to pick image from gallery"
+  },
+  "captureImageButton": "Capture Photo",
+  "@captureImageButton": {
+    "description": "Button to capture image with camera"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for settings screen"
+  },
+  "languageSetting": "Language",
+  "@languageSetting": {
+    "description": "Language setting section title"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "languageHindi": "हिंदी (Hindi)",
+  "@languageHindi": {
+    "description": "Hindi language option"
+  },
+  "themeSetting": "Theme Mode",
+  "@themeSetting": {
+    "description": "Theme setting section title"
+  },
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "Light theme mode"
+  },
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "Dark theme mode"
+  },
+  "themeSystem": "System Default",
+  "@themeSystem": {
+    "description": "System theme mode"
+  },
+  "profileSection": "User Profile",
+  "@profileSection": {
+    "description": "Profile section title"
+  },
+  "anonymousUser": "Guest User",
+  "@anonymousUser": {
+    "description": "Label for unauthenticated or guest user"
+  }
+}
