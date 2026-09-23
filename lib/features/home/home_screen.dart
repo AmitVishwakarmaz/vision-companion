@@ -2,13 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/di/injection_container.dart';
 import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
+import 'package:vision_companion/features/history/repositories/history_repository.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _logCardClick({
+    required String featureType,
+    required String resultSummary,
+    Map<String, dynamic>? metadata,
+  }) {
+    try {
+      if (sl.isRegistered<HistoryRepository>()) {
+        sl<HistoryRepository>().logHistory(
+          featureType: featureType,
+          resultSummary: resultSummary,
+          metadata: metadata,
+        ).catchError((_) => '');
+      }
+    } catch (_) {}
+  }
 
   void _showProfileBottomSheet(BuildContext context, String displayName, String email) {
     final l10n = AppLocalizations.of(context)!;
@@ -259,7 +277,17 @@ class HomeScreen extends StatelessWidget {
                   actionPrompt: l10n.clickToStart,
                   semanticLabel: l10n.detectorCardSemantic,
                   icon: Icons.camera_alt_rounded,
-                  onTap: () => context.push(AppConstants.routeDetector),
+                  onTap: () {
+                    _logCardClick(
+                      featureType: AppConstants.featureTypeDetector,
+                      resultSummary: 'Live object detection session initiated.',
+                      metadata: {
+                        'source': 'home_feature_card',
+                        'action': 'start_detector',
+                      },
+                    );
+                    context.push(AppConstants.routeDetector);
+                  },
                 ),
                 const SizedBox(height: 20),
 
@@ -270,7 +298,18 @@ class HomeScreen extends StatelessWidget {
                   actionPrompt: l10n.clickToStart,
                   semanticLabel: l10n.analyzerCardSemantic,
                   icon: Icons.auto_awesome_rounded,
-                  onTap: () => context.push(AppConstants.routeAnalyzer),
+                  onTap: () {
+                    _logCardClick(
+                      featureType: AppConstants.featureTypeAnalyzer,
+                      resultSummary: 'AI Image Analysis feature placeholder ready for API integration.',
+                      metadata: {
+                        'source': 'home_feature_card',
+                        'action': 'open_analyzer',
+                        'imagePath': 'placeholder_gallery_image.jpg',
+                      },
+                    );
+                    context.push(AppConstants.routeAnalyzer);
+                  },
                 ),
               ],
             ),

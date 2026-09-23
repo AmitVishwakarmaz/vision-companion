@@ -43,6 +43,9 @@ class FakeHistoryRepository implements HistoryRepository {
       metadata: metadata,
     );
     entries.add(entry);
+    if (entries.length > AppConstants.maxHistoryEntries) {
+      entries.removeRange(0, entries.length - AppConstants.maxHistoryEntries);
+    }
     return id;
   }
 
@@ -89,7 +92,7 @@ class FakeHistoryRepository implements HistoryRepository {
     if (featureType != null) {
       result = result.where((e) => e.featureType == featureType).toList();
     }
-    return result.take(limit).toList();
+    return result.reversed.take(limit).toList();
   }
 
   @override
@@ -242,6 +245,24 @@ void main() {
       );
       expect(detectorOnly.length, equals(1));
       expect(detectorOnly.first.resultSummary, equals('Detected phone, laptop'));
+    });
+
+    test('retains previous entries and enforces sliding limit of last 20 entries', () async {
+      final fakeRepo = FakeHistoryRepository();
+
+      for (int i = 1; i <= 25; i++) {
+        await fakeRepo.logHistory(
+          featureType: i.isEven ? AppConstants.featureTypeDetector : AppConstants.featureTypeAnalyzer,
+          resultSummary: 'Log entry #$i',
+        );
+      }
+
+      final allLogs = await fakeRepo.getHistory();
+      expect(allLogs.length, equals(AppConstants.maxHistoryEntries)); // exactly 20
+      // Latest entry #25 is preserved at index 0
+      expect(allLogs.first.resultSummary, equals('Log entry #25'));
+      // Oldest retained entry is #6 (entries 1-5 were pruned)
+      expect(allLogs.last.resultSummary, equals('Log entry #6'));
     });
   });
 }

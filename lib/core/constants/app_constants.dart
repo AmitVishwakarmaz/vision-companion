@@ -23,6 +23,7 @@ class AppConstants {
   // Feature Types for History Logging
   static const String featureTypeDetector = 'detector';
   static const String featureTypeAnalyzer = 'analyzer';
+  static const int maxHistoryEntries = 20;
 
   // OAuth / Google Sign-In
   static const String googleServerClientId =

@@ -102,11 +102,35 @@ class FirestoreHistoryRepository implements HistoryRepository {
       };
 
       final docRef = await _historyCollection(effectiveUid).add(docData);
+
+      // Enforce sliding window limit (keep last 20 history entries, delete older ones)
+      _pruneOldHistory(effectiveUid, maxLimit: AppConstants.maxHistoryEntries);
+
       return docRef.id;
     } catch (e) {
       debugPrint('FirestoreHistoryRepository error logging history: $e');
       if (e is HistoryException) rethrow;
       throw HistoryException('Failed to log history: $e');
+    }
+  }
+
+  Future<void> _pruneOldHistory(String uid, {int maxLimit = AppConstants.maxHistoryEntries}) async {
+    try {
+      final snapshot = await _historyCollection(uid)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      if (snapshot.docs.length > maxLimit) {
+        final docsToDelete = snapshot.docs.sublist(maxLimit);
+        final db = _firestore ?? FirebaseFirestore.instance;
+        final batch = db.batch();
+        for (final doc in docsToDelete) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('FirestoreHistoryRepository prune error (ignored): $e');
     }
   }
 
