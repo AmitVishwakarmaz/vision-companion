@@ -189,6 +189,42 @@
   "@captureImageButton": {
     "description": "Button to capture image with camera"
   },
+  "analyzingProgress": "Analyzing image with AI...",
+  "@analyzingProgress": {
+    "description": "Progress message while analyzing image"
+  },
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Button to retry a failed operation"
+  },
+  "captureAnotherButton": "Take Another Photo",
+  "@captureAnotherButton": {
+    "description": "Button to clear result and take another photo"
+  },
+  "analysisResultTitle": "Scene Description",
+  "@analysisResultTitle": {
+    "description": "Header title for analysis result"
+  },
+  "analyzerCameraFeedSemantic": "Live camera view for image analysis",
+  "@analyzerCameraFeedSemantic": {
+    "description": "Accessibility label for analyzer camera feed"
+  },
+  "captureButtonSemantic": "Capture photo for AI analysis",
+  "@captureButtonSemantic": {
+    "description": "Accessibility label for capture button"
+  },
+  "retryButtonSemantic": "Retry analyzing the photo",
+  "@retryButtonSemantic": {
+    "description": "Accessibility label for retry button"
+  },
+  "errorDialogTitle": "Notice",
+  "@errorDialogTitle": {
+    "description": "Title for accessible error popup dialog"
+  },
+  "errorDialogDismiss": "Dismiss",
+  "@errorDialogDismiss": {
+    "description": "Button to dismiss the error dialog"
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Title for settings screen"

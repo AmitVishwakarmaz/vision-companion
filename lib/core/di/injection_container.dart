@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
 import 'package:vision_companion/core/services/analytics_service.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
+import 'package:vision_companion/features/analyzer/services/gemini_vision_service.dart';
+import 'package:vision_companion/features/analyzer/services/groq_vision_service.dart';
+import 'package:vision_companion/features/analyzer/services/vision_service.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
@@ -106,7 +109,16 @@ Future<void> initDependencies({
     ),
   );
 
+  // Vision Services
+  sl.registerLazySingleton<GeminiVisionService>(() => GeminiVisionService());
+  sl.registerLazySingleton<GroqVisionService>(() => GroqVisionService());
+  sl.registerLazySingleton<VisionService>(() => sl<GeminiVisionService>());
+
   sl.registerFactory<AnalyzerCubit>(
-    () => AnalyzerCubit(historyRepository: sl<HistoryRepository>()),
+    () => AnalyzerCubit(
+      visionService: sl<VisionService>(),
+      historyRepository: sl<HistoryRepository>(),
+      analyticsService: sl<AnalyticsService>(),
+    ),
   );
 }

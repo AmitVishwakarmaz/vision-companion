@@ -144,6 +144,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get captureImageButton => 'फोटो खींचें';
 
   @override
+  String get analyzingProgress => 'AI के साथ विश्लेषण किया जा रहा है...';
+
+  @override
+  String get retryButton => 'पुनः प्रयास करें';
+
+  @override
+  String get captureAnotherButton => 'दूसरी फोटो लें';
+
+  @override
+  String get analysisResultTitle => 'दृश्य विवरण';
+
+  @override
+  String get analyzerCameraFeedSemantic =>
+      'छवि विश्लेषण के लिए लाइव कैमरा दृश्य';
+
+  @override
+  String get captureButtonSemantic => 'AI विश्लेषण के लिए फोटो खींचें';
+
+  @override
+  String get retryButtonSemantic => 'फोटो का पुनः विश्लेषण करें';
+
+  @override
+  String get errorDialogTitle => 'सूचना';
+
+  @override
+  String get errorDialogDismiss => 'खारिज करें';
+
+  @override
   String get settingsTitle => 'सेटिंग्स';
 
   @override

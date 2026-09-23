@@ -338,6 +338,60 @@ abstract class AppLocalizations {
   /// **'Capture Photo'**
   String get captureImageButton;
 
+  /// Progress message while analyzing image
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing image with AI...'**
+  String get analyzingProgress;
+
+  /// Button to retry a failed operation
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryButton;
+
+  /// Button to clear result and take another photo
+  ///
+  /// In en, this message translates to:
+  /// **'Take Another Photo'**
+  String get captureAnotherButton;
+
+  /// Header title for analysis result
+  ///
+  /// In en, this message translates to:
+  /// **'Scene Description'**
+  String get analysisResultTitle;
+
+  /// Accessibility label for analyzer camera feed
+  ///
+  /// In en, this message translates to:
+  /// **'Live camera view for image analysis'**
+  String get analyzerCameraFeedSemantic;
+
+  /// Accessibility label for capture button
+  ///
+  /// In en, this message translates to:
+  /// **'Capture photo for AI analysis'**
+  String get captureButtonSemantic;
+
+  /// Accessibility label for retry button
+  ///
+  /// In en, this message translates to:
+  /// **'Retry analyzing the photo'**
+  String get retryButtonSemantic;
+
+  /// Title for accessible error popup dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get errorDialogTitle;
+
+  /// Button to dismiss the error dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get errorDialogDismiss;
+
   /// Title for settings screen
   ///
   /// In en, this message translates to:

@@ -144,6 +144,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get captureImageButton => 'Capture Photo';
 
   @override
+  String get analyzingProgress => 'Analyzing image with AI...';
+
+  @override
+  String get retryButton => 'Retry';
+
+  @override
+  String get captureAnotherButton => 'Take Another Photo';
+
+  @override
+  String get analysisResultTitle => 'Scene Description';
+
+  @override
+  String get analyzerCameraFeedSemantic =>
+      'Live camera view for image analysis';
+
+  @override
+  String get captureButtonSemantic => 'Capture photo for AI analysis';
+
+  @override
+  String get retryButtonSemantic => 'Retry analyzing the photo';
+
+  @override
+  String get errorDialogTitle => 'Notice';
+
+  @override
+  String get errorDialogDismiss => 'Dismiss';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
