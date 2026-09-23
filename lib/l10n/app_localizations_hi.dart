@@ -157,4 +157,40 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get authErrorGeneric =>
       'प्रमाणीकरण विफल रहा। कृपया अपनी जानकारी जांचें।';
+
+  @override
+  String greetingWithName(String name) {
+    return 'नमस्ते, $name!';
+  }
+
+  @override
+  String profileSemanticLabel(String name) {
+    return 'प्रोफ़ाइल: $name, मेनू खोलने के लिए टैप करें';
+  }
+
+  @override
+  String get profileMenuTitle => 'खाता प्रोफ़ाइल';
+
+  @override
+  String get profileMenuClose => 'प्रोफ़ाइल मेनू बंद करें';
+
+  @override
+  String get startFeatureButton => 'शुरू करें';
+
+  @override
+  String get detectorCardSemantic =>
+      'लाइव वस्तु संसूचक: TFLite के माध्यम से रीयल-टाइम ऑन-डिवाइस ऑब्जेक्ट डिटेक्शन। शुरू करने के लिए दो बार टैप करें।';
+
+  @override
+  String get analyzerCardSemantic =>
+      'AI छवि विश्लेषक: AI द्वारा गहन दृश्य समझ और विवरण। शुरू करने के लिए दो बार टैप करें।';
+
+  @override
+  String get emailNotProvided => 'कोई ईमेल नहीं दिया गया';
+
+  @override
+  String get loginHeaderSemantic => 'विज़न कम्पेनियन लोगो';
+
+  @override
+  String get passwordVisibilityToggleSemantic => 'पासवर्ड दृश्यता बदलें';
 }

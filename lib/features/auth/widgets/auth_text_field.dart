@@ -27,22 +27,30 @@ class AuthTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+        Semantics(
+          header: true,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
         ),
         const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(prefixIcon),
-            suffixIcon: suffixIcon,
+        Semantics(
+          label: '$label. $hint',
+          textField: true,
+          obscured: obscureText,
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            validator: validator,
+            decoration: InputDecoration(
+              hintText: hint,
+              prefixIcon: Icon(prefixIcon),
+              suffixIcon: suffixIcon,
+            ),
           ),
         ),
       ],

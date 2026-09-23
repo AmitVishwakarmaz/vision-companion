@@ -46,5 +46,15 @@
   "authErrorTooManyRequests": "बहुत सारे असफल प्रयास। कृपया बाद में पुनः प्रयास करें।",
   "authErrorNetworkFailed": "नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
   "authErrorGoogleCancelled": "गूगल साइन-इन रद्द कर दिया गया।",
-  "authErrorGeneric": "प्रमाणीकरण विफल रहा। कृपया अपनी जानकारी जांचें।"
+  "authErrorGeneric": "प्रमाणीकरण विफल रहा। कृपया अपनी जानकारी जांचें।",
+  "greetingWithName": "नमस्ते, {name}!",
+  "profileSemanticLabel": "प्रोफ़ाइल: {name}, मेनू खोलने के लिए टैप करें",
+  "profileMenuTitle": "खाता प्रोफ़ाइल",
+  "profileMenuClose": "प्रोफ़ाइल मेनू बंद करें",
+  "startFeatureButton": "शुरू करें",
+  "detectorCardSemantic": "लाइव वस्तु संसूचक: TFLite के माध्यम से रीयल-टाइम ऑन-डिवाइस ऑब्जेक्ट डिटेक्शन। शुरू करने के लिए दो बार टैप करें।",
+  "analyzerCardSemantic": "AI छवि विश्लेषक: AI द्वारा गहन दृश्य समझ और विवरण। शुरू करने के लिए दो बार टैप करें।",
+  "emailNotProvided": "कोई ईमेल नहीं दिया गया",
+  "loginHeaderSemantic": "विज़न कम्पेनियन लोगो",
+  "passwordVisibilityToggleSemantic": "पासवर्ड दृश्यता बदलें"
 }

@@ -157,4 +157,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authErrorGeneric =>
       'Authentication failed. Please check your credentials.';
+
+  @override
+  String greetingWithName(String name) {
+    return 'Hello, $name!';
+  }
+
+  @override
+  String profileSemanticLabel(String name) {
+    return 'Profile: $name, tap to open menu';
+  }
+
+  @override
+  String get profileMenuTitle => 'Account Profile';
+
+  @override
+  String get profileMenuClose => 'Close profile menu';
+
+  @override
+  String get startFeatureButton => 'Start';
+
+  @override
+  String get detectorCardSemantic =>
+      'Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.';
+
+  @override
+  String get analyzerCardSemantic =>
+      'AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.';
+
+  @override
+  String get emailNotProvided => 'No email provided';
+
+  @override
+  String get loginHeaderSemantic => 'Vision Companion logo';
+
+  @override
+  String get passwordVisibilityToggleSemantic => 'Toggle password visibility';
 }

@@ -379,6 +379,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Authentication failed. Please check your credentials.'**
   String get authErrorGeneric;
+
+  /// Greeting with user display name
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}!'**
+  String greetingWithName(String name);
+
+  /// Accessibility semantic label for profile avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Profile: {name}, tap to open menu'**
+  String profileSemanticLabel(String name);
+
+  /// Title for profile bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Account Profile'**
+  String get profileMenuTitle;
+
+  /// Accessibility label to close profile bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Close profile menu'**
+  String get profileMenuClose;
+
+  /// Button label to start a feature
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startFeatureButton;
+
+  /// Accessibility announcement for object detector card
+  ///
+  /// In en, this message translates to:
+  /// **'Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.'**
+  String get detectorCardSemantic;
+
+  /// Accessibility announcement for AI analyzer card
+  ///
+  /// In en, this message translates to:
+  /// **'AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.'**
+  String get analyzerCardSemantic;
+
+  /// Placeholder when user email is absent
+  ///
+  /// In en, this message translates to:
+  /// **'No email provided'**
+  String get emailNotProvided;
+
+  /// Accessibility label for login logo
+  ///
+  /// In en, this message translates to:
+  /// **'Vision Companion logo'**
+  String get loginHeaderSemantic;
+
+  /// Accessibility label for password toggle button
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle password visibility'**
+  String get passwordVisibilityToggleSemantic;
 }
 
 class _AppLocalizationsDelegate

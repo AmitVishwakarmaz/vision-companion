@@ -73,17 +73,24 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(
-                        Icons.visibility_rounded,
-                        size: 72,
-                        color: theme.colorScheme.primary,
+                      Semantics(
+                        label: l10n.loginHeaderSemantic,
+                        image: true,
+                        child: Icon(
+                          Icons.visibility_rounded,
+                          size: 72,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        l10n.loginTitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          l10n.loginTitle,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -115,17 +122,23 @@ class _LoginPageState extends State<LoginPage> {
                         hint: l10n.passwordHint,
                         prefixIcon: Icons.lock_outline_rounded,
                         obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
+                        suffixIcon: Semantics(
+                          label: l10n.passwordVisibilityToggleSemantic,
+                          button: true,
+                          child: IconButton(
+                            iconSize: 24,
+                            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {

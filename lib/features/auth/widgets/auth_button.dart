@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AuthButton extends StatelessWidget {
   final String text;
+  final String? semanticLabel;
   final VoidCallback? onPressed;
   final bool isLoading;
   final IconData? icon;
@@ -10,6 +11,7 @@ class AuthButton extends StatelessWidget {
   const AuthButton({
     super.key,
     required this.text,
+    this.semanticLabel,
     required this.onPressed,
     this.isLoading = false,
     this.icon,
@@ -18,16 +20,24 @@ class AuthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isOutlined) {
-      return OutlinedButton(
-        onPressed: isLoading ? null : onPressed,
-        child: _buildChild(context),
-      );
-    }
+    final effectiveLabel = semanticLabel ?? text;
 
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
-      child: _buildChild(context),
+    return Semantics(
+      button: true,
+      enabled: !isLoading && onPressed != null,
+      label: effectiveLabel,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: isOutlined
+            ? OutlinedButton(
+                onPressed: isLoading ? null : onPressed,
+                child: _buildChild(context),
+              )
+            : ElevatedButton(
+                onPressed: isLoading ? null : onPressed,
+                child: _buildChild(context),
+              ),
+      ),
     );
   }
 

@@ -187,5 +187,55 @@
   "authErrorGeneric": "Authentication failed. Please check your credentials.",
   "@authErrorGeneric": {
     "description": "Generic authentication failure message"
+  },
+  "greetingWithName": "Hello, {name}!",
+  "@greetingWithName": {
+    "description": "Greeting with user display name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSemanticLabel": "Profile: {name}, tap to open menu",
+  "@profileSemanticLabel": {
+    "description": "Accessibility semantic label for profile avatar",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileMenuTitle": "Account Profile",
+  "@profileMenuTitle": {
+    "description": "Title for profile bottom sheet"
+  },
+  "profileMenuClose": "Close profile menu",
+  "@profileMenuClose": {
+    "description": "Accessibility label to close profile bottom sheet"
+  },
+  "startFeatureButton": "Start",
+  "@startFeatureButton": {
+    "description": "Button label to start a feature"
+  },
+  "detectorCardSemantic": "Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.",
+  "@detectorCardSemantic": {
+    "description": "Accessibility announcement for object detector card"
+  },
+  "analyzerCardSemantic": "AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.",
+  "@analyzerCardSemantic": {
+    "description": "Accessibility announcement for AI analyzer card"
+  },
+  "emailNotProvided": "No email provided",
+  "@emailNotProvided": {
+    "description": "Placeholder when user email is absent"
+  },
+  "loginHeaderSemantic": "Vision Companion logo",
+  "@loginHeaderSemantic": {
+    "description": "Accessibility label for login logo"
+  },
+  "passwordVisibilityToggleSemantic": "Toggle password visibility",
+  "@passwordVisibilityToggleSemantic": {
+    "description": "Accessibility label for password toggle button"
   }
 }
