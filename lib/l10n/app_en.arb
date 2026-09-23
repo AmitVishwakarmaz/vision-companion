@@ -100,6 +100,79 @@
   "@stopDetection": {
     "description": "Button to stop detection"
   },
+  "pauseDetection": "Pause detection",
+  "@pauseDetection": {
+    "description": "Button and semantic label to pause detection"
+  },
+  "resumeDetection": "Resume detection",
+  "@resumeDetection": {
+    "description": "Button and semantic label to resume detection"
+  },
+  "cameraFeedSemantic": "Live camera feed for object detection",
+  "@cameraFeedSemantic": {
+    "description": "Semantic accessibility label for live camera preview"
+  },
+  "detectedObjectAnnouncement": "{label} detected",
+  "@detectedObjectAnnouncement": {
+    "description": "TalkBack announcement when an object is detected",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "person"
+      }
+    }
+  },
+  "detectorPausedStatus": "Detection paused",
+  "@detectorPausedStatus": {
+    "description": "Status text when detection is paused"
+  },
+  "detectorReadyStatus": "Ready to detect",
+  "@detectorReadyStatus": {
+    "description": "Status text when detection is ready"
+  },
+  "detectorObjectsCount": "{count} objects detected",
+  "@detectorObjectsCount": {
+    "description": "HUD count of detected objects",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detectorObjectsCountWithLatency": "{count} objects | {latency}ms",
+  "@detectorObjectsCountWithLatency": {
+    "description": "HUD count with latency in milliseconds",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "latency": {
+        "type": "int"
+      }
+    }
+  },
+  "detectorPausedWithCount": "Detection paused ({count} saved)",
+  "@detectorPausedWithCount": {
+    "description": "HUD status text when detection is paused with saved count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cameraUnavailable": "No camera available on this device.",
+  "@cameraUnavailable": {
+    "description": "Error message when no camera is found"
+  },
+  "cameraErrorPrefix": "Camera error: {error}",
+  "@cameraErrorPrefix": {
+    "description": "Error message prefix for camera issues",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "analyzerScreenTitle": "AI Scene Analyzer",
   "@analyzerScreenTitle": {
     "description": "Title for analyzer screen"

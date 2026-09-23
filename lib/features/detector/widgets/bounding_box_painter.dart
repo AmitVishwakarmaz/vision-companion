@@ -3,14 +3,16 @@ import 'package:vision_companion/features/detector/constants/coco_labels.dart';
 import 'package:vision_companion/features/detector/models/detection.dart';
 
 /// CustomPainter that renders high-contrast bounding boxes, confidence percentages,
-/// and color-coded boxes by object category over the camera preview.
+/// and color-coded boxes by object category over the camera preview with localized labels.
 class BoundingBoxPainter extends CustomPainter {
   final List<Detection> detections;
   final Size? previewSize;
+  final String languageCode;
 
   BoundingBoxPainter({
     required this.detections,
     this.previewSize,
+    this.languageCode = 'en',
   });
 
   @override
@@ -53,9 +55,14 @@ class BoundingBoxPainter extends CustomPainter {
         ..strokeWidth = 2.5;
       canvas.drawRRect(rrect, categoryStroke);
 
-      // 3. Label text: Object category + confidence percentage, e.g. "PERSON 92%"
+      // 3. Label text: Localized object category + confidence percentage, e.g. "व्यक्ति 92%" in Hindi or "PERSON 92%" in English
+      final localizedLabel = CocoLabels.getLocalizedLabel(detection.label, languageCode);
+      final displayText = languageCode == 'hi'
+          ? ' $localizedLabel ${detection.confidencePercentage}% '
+          : ' ${localizedLabel.toUpperCase()} ${detection.confidencePercentage}% ';
+
       final textSpan = TextSpan(
-        text: ' ${detection.label.toUpperCase()} ${detection.confidencePercentage}% ',
+        text: displayText,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
@@ -102,6 +109,8 @@ class BoundingBoxPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant BoundingBoxPainter oldDelegate) {
-    return oldDelegate.detections != detections || oldDelegate.previewSize != previewSize;
+    return oldDelegate.detections != detections ||
+        oldDelegate.previewSize != previewSize ||
+        oldDelegate.languageCode != languageCode;
   }
 }

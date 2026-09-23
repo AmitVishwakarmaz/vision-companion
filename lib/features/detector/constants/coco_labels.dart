@@ -99,6 +99,98 @@ class CocoLabels {
     return 'Object';
   }
 
+  /// Map of COCO English labels to natural Hindi terms.
+  static const Map<String, String> hindiLabels = {
+    'person': 'व्यक्ति',
+    'bicycle': 'साइकिल',
+    'car': 'कार',
+    'motorcycle': 'मोटरसाइकिल',
+    'airplane': 'हवाई जहाज',
+    'bus': 'बस',
+    'train': 'ट्रेन',
+    'truck': 'ट्रक',
+    'boat': 'नाव',
+    'traffic light': 'ट्रैफिक लाइट',
+    'fire hydrant': 'फायर हाइड्रेंट',
+    'stop sign': 'स्टॉप साइन',
+    'parking meter': 'पार्किंग मीटर',
+    'bench': 'बेंच',
+    'bird': 'पक्षी',
+    'cat': 'बिल्ली',
+    'dog': 'कुत्ता',
+    'horse': 'घोड़ा',
+    'sheep': 'भेड़',
+    'cow': 'गाय',
+    'elephant': 'हाथी',
+    'bear': 'भालू',
+    'zebra': 'ज़ेबरा',
+    'giraffe': 'जिराफ़',
+    'backpack': 'बैग',
+    'umbrella': 'छाता',
+    'handbag': 'पर्स',
+    'tie': 'टाई',
+    'suitcase': 'सूटकेस',
+    'frisbee': 'फ्रिस्बी',
+    'skis': 'स्की',
+    'snowboard': 'स्नोबोर्ड',
+    'sports ball': 'खेल की गेंद',
+    'kite': 'पतंग',
+    'baseball bat': 'बेसबॉल बल्ला',
+    'baseball glove': 'बेसबॉल दस्ताना',
+    'skateboard': 'स्केटबोर्ड',
+    'surfboard': 'सर्फ़बोर्ड',
+    'tennis racket': 'टेनिस रैकेट',
+    'bottle': 'बोतल',
+    'wine glass': 'कांच का गिलास',
+    'cup': 'कप',
+    'fork': 'कांटा',
+    'knife': 'चाकू',
+    'spoon': 'चम्मच',
+    'bowl': 'कटोरा',
+    'banana': 'केला',
+    'apple': 'सेब',
+    'sandwich': 'सैंडविच',
+    'orange': 'संतरा',
+    'broccoli': 'ब्रोकली',
+    'carrot': 'गाजर',
+    'hot dog': 'हॉट डॉग',
+    'pizza': 'पिज़्ज़ा',
+    'donut': 'डोनट',
+    'cake': 'केक',
+    'chair': 'कुर्सी',
+    'couch': 'सोफ़ा',
+    'potted plant': 'गमले का पौधा',
+    'bed': 'बिस्तर',
+    'dining table': 'खाने की मेज़',
+    'toilet': 'शौचालय',
+    'tv': 'टीवी',
+    'laptop': 'लैपटॉप',
+    'mouse': 'माउस',
+    'remote': 'रिमोट',
+    'keyboard': 'कीबोर्ड',
+    'cell phone': 'मोबाइल फोन',
+    'microwave': 'माइक्रोवेव',
+    'oven': 'ओवन',
+    'toaster': 'टोस्टर',
+    'sink': 'सिंक',
+    'refrigerator': 'फ्रिज',
+    'book': 'किताब',
+    'clock': 'घड़ी',
+    'vase': 'फूलदान',
+    'scissors': 'कैंची',
+    'teddy bear': 'टेडी बियर',
+    'hair drier': 'हेयर ड्रायर',
+    'toothbrush': 'टूथब्रश',
+  };
+
+  /// Returns the localized label for a detected object according to the active language code.
+  static String getLocalizedLabel(String label, String languageCode) {
+    if (languageCode == 'hi') {
+      return hindiLabels[label.toLowerCase()] ?? label;
+    }
+    return label;
+  }
+
   /// Returns a vivid, distinct color based on the object's category for clear visual identification.
   static Color getColorForCategory(String label) {
     final lower = label.toLowerCase();

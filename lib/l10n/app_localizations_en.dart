@@ -88,6 +88,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopDetection => 'Stop Detection';
 
   @override
+  String get pauseDetection => 'Pause detection';
+
+  @override
+  String get resumeDetection => 'Resume detection';
+
+  @override
+  String get cameraFeedSemantic => 'Live camera feed for object detection';
+
+  @override
+  String detectedObjectAnnouncement(String label) {
+    return '$label detected';
+  }
+
+  @override
+  String get detectorPausedStatus => 'Detection paused';
+
+  @override
+  String get detectorReadyStatus => 'Ready to detect';
+
+  @override
+  String detectorObjectsCount(int count) {
+    return '$count objects detected';
+  }
+
+  @override
+  String detectorObjectsCountWithLatency(int count, int latency) {
+    return '$count objects | ${latency}ms';
+  }
+
+  @override
+  String detectorPausedWithCount(int count) {
+    return 'Detection paused ($count saved)';
+  }
+
+  @override
+  String get cameraUnavailable => 'No camera available on this device.';
+
+  @override
+  String cameraErrorPrefix(String error) {
+    return 'Camera error: $error';
+  }
+
+  @override
   String get analyzerScreenTitle => 'AI Scene Analyzer';
 
   @override

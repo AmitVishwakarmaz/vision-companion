@@ -248,6 +248,72 @@ abstract class AppLocalizations {
   /// **'Stop Detection'**
   String get stopDetection;
 
+  /// Button and semantic label to pause detection
+  ///
+  /// In en, this message translates to:
+  /// **'Pause detection'**
+  String get pauseDetection;
+
+  /// Button and semantic label to resume detection
+  ///
+  /// In en, this message translates to:
+  /// **'Resume detection'**
+  String get resumeDetection;
+
+  /// Semantic accessibility label for live camera preview
+  ///
+  /// In en, this message translates to:
+  /// **'Live camera feed for object detection'**
+  String get cameraFeedSemantic;
+
+  /// TalkBack announcement when an object is detected
+  ///
+  /// In en, this message translates to:
+  /// **'{label} detected'**
+  String detectedObjectAnnouncement(String label);
+
+  /// Status text when detection is paused
+  ///
+  /// In en, this message translates to:
+  /// **'Detection paused'**
+  String get detectorPausedStatus;
+
+  /// Status text when detection is ready
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to detect'**
+  String get detectorReadyStatus;
+
+  /// HUD count of detected objects
+  ///
+  /// In en, this message translates to:
+  /// **'{count} objects detected'**
+  String detectorObjectsCount(int count);
+
+  /// HUD count with latency in milliseconds
+  ///
+  /// In en, this message translates to:
+  /// **'{count} objects | {latency}ms'**
+  String detectorObjectsCountWithLatency(int count, int latency);
+
+  /// HUD status text when detection is paused with saved count
+  ///
+  /// In en, this message translates to:
+  /// **'Detection paused ({count} saved)'**
+  String detectorPausedWithCount(int count);
+
+  /// Error message when no camera is found
+  ///
+  /// In en, this message translates to:
+  /// **'No camera available on this device.'**
+  String get cameraUnavailable;
+
+  /// Error message prefix for camera issues
+  ///
+  /// In en, this message translates to:
+  /// **'Camera error: {error}'**
+  String cameraErrorPrefix(String error);
+
   /// Title for analyzer screen
   ///
   /// In en, this message translates to:

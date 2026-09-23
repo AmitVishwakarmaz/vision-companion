@@ -88,6 +88,49 @@ class AppLocalizationsHi extends AppLocalizations {
   String get stopDetection => 'डिटेक्शन रोकें';
 
   @override
+  String get pauseDetection => 'डिटेक्शन रोकें';
+
+  @override
+  String get resumeDetection => 'डिटेक्शन फिर शुरू करें';
+
+  @override
+  String get cameraFeedSemantic => 'वस्तु संसूचन के लिए लाइव कैमरा फ़ीड';
+
+  @override
+  String detectedObjectAnnouncement(String label) {
+    return '$label मिला';
+  }
+
+  @override
+  String get detectorPausedStatus => 'डिटेक्शन रुका हुआ है';
+
+  @override
+  String get detectorReadyStatus => 'डिटेक्ट करने के लिए तैयार';
+
+  @override
+  String detectorObjectsCount(int count) {
+    return '$count वस्तुएं संसूचित';
+  }
+
+  @override
+  String detectorObjectsCountWithLatency(int count, int latency) {
+    return '$count वस्तुएं | ${latency}ms';
+  }
+
+  @override
+  String detectorPausedWithCount(int count) {
+    return 'डिटेक्शन रुका हुआ ($count सहेजे गए)';
+  }
+
+  @override
+  String get cameraUnavailable => 'इस डिवाइस पर कोई कैमरा उपलब्ध नहीं है।';
+
+  @override
+  String cameraErrorPrefix(String error) {
+    return 'कैमरा त्रुटि: $error';
+  }
+
+  @override
   String get analyzerScreenTitle => 'AI दृश्य विश्लेषक';
 
   @override
