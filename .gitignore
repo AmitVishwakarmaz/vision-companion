@@ -12,6 +12,8 @@ build/
 .idea/
 .vscode/
 *.iml
+*.iws
+*.ipr
 
 # Android
 android/.gradle/
@@ -21,6 +23,7 @@ android/local.properties
 android/key.properties
 android/app/*.jks
 android/app/*.keystore
+android/app/src/main/assets/models/*.tflite.download
 
 # iOS
 ios/Pods/
@@ -32,6 +35,20 @@ ios/Runner/GeneratedPluginRegistrant.*
 # macOS
 macos/Pods/
 macos/Flutter/ephemeral/
+
+# Windows
+windows/flutter/ephemeral/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Web
+web/build/
+
+# Application Bundles / Artifacts
+*.apk
+*.aab
+*.ipa
 
 # Environment / Secrets
 .env
