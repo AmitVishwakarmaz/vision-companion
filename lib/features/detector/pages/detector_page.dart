@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
 import 'package:vision_companion/features/detector/cubit/detector_state.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
@@ -13,8 +14,20 @@ class DetectorPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.detectorScreenTitle),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          l10n.detectorScreenTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: LanguageToggleButton(),
+          ),
+        ],
       ),
       body: BlocBuilder<DetectorCubit, DetectorState>(
         builder: (context, state) {

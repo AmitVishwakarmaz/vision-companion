@@ -128,10 +128,10 @@ abstract class AppLocalizations {
   /// **'Live Object Detector'**
   String get featureDetectorTitle;
 
-  /// Description for feature 1
+  /// Simple description for feature 1
   ///
   /// In en, this message translates to:
-  /// **'Real-time on-device object detection using TFLite'**
+  /// **'Point your camera to detect and hear objects around you in real time'**
   String get featureDetectorDesc;
 
   /// Title for feature 2
@@ -140,10 +140,10 @@ abstract class AppLocalizations {
   /// **'AI Image Analyzer'**
   String get featureAnalyzerTitle;
 
-  /// Description for feature 2
+  /// Simple description for feature 2
   ///
   /// In en, this message translates to:
-  /// **'In-depth visual understanding and scene description via AI'**
+  /// **'Take or choose a photo to hear a detailed description of the scene'**
   String get featureAnalyzerDesc;
 
   /// Title for settings feature
@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// Placeholder message for detector screen
   ///
   /// In en, this message translates to:
-  /// **'TFLite Live Camera Feed will stream here'**
+  /// **'Live camera feed will appear here'**
   String get detectorPlaceholderMessage;
 
   /// Button to start detection
@@ -410,16 +410,22 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get startFeatureButton;
 
+  /// Text prompt on feature card indicating user can tap anywhere to start
+  ///
+  /// In en, this message translates to:
+  /// **'Click to start'**
+  String get clickToStart;
+
   /// Accessibility announcement for object detector card
   ///
   /// In en, this message translates to:
-  /// **'Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.'**
+  /// **'Live Object Detector: Point your camera to detect and hear objects around you in real time. Click to start.'**
   String get detectorCardSemantic;
 
   /// Accessibility announcement for AI analyzer card
   ///
   /// In en, this message translates to:
-  /// **'AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.'**
+  /// **'AI Image Analyzer: Take or choose a photo to hear a detailed description of the scene. Click to start.'**
   String get analyzerCardSemantic;
 
   /// Placeholder when user email is absent
@@ -439,6 +445,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle password visibility'**
   String get passwordVisibilityToggleSemantic;
+
+  /// Title for sign up screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get signUpTitle;
+
+  /// Subtitle for sign up screen
+  ///
+  /// In en, this message translates to:
+  /// **'Join Vision Companion for assistive vision support'**
+  String get signUpSubtitle;
+
+  /// Text for create account button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get signUpButton;
+
+  /// Label for name field
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get nameLabel;
+
+  /// Hint for name field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get nameHint;
+
+  /// Validation error for empty name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get nameRequired;
+
+  /// Label for confirm password field
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPasswordLabel;
+
+  /// Hint for confirm password field
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get confirmPasswordHint;
+
+  /// Validation error for empty confirm password
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get confirmPasswordRequired;
+
+  /// Validation error when passwords differ
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// Validation error when password is under 6 characters
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
+  /// Prompt to switch to sign in mode
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign In'**
+  String get alreadyHaveAccount;
+
+  /// Prompt to switch to sign up mode
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Sign Up'**
+  String get dontHaveAccount;
+
+  /// Accessibility label to switch to sign up form
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Sign Up form'**
+  String get switchToSignUpSemantic;
+
+  /// Accessibility label to switch to sign in form
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Sign In form'**
+  String get switchToSignInSemantic;
+
+  /// Error message when email is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists with this email address.'**
+  String get authErrorEmailAlreadyInUse;
+
+  /// Error message when password is too weak
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too weak. Please use at least 6 characters.'**
+  String get authErrorWeakPassword;
+
+  /// App title on splash screen
+  ///
+  /// In en, this message translates to:
+  /// **'Vision Companion'**
+  String get splashTitle;
+
+  /// App subtitle on splash screen
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistive Companion'**
+  String get splashSubtitle;
+
+  /// Prompt on splash screen to choose language
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome! Please choose your preferred language to continue.'**
+  String get splashWelcomeText;
+
+  /// Header for language selection
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language / भाषा चुनें'**
+  String get selectLanguagePrompt;
+
+  /// Continue button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Semantic announcement for continue button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to application'**
+  String get continueButtonSemantic;
+
+  /// Semantic announcement when language is selected
+  ///
+  /// In en, this message translates to:
+  /// **'{language} selected'**
+  String languageSelectedSemantic(String language);
 }
 
 class _AppLocalizationsDelegate

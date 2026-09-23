@@ -26,14 +26,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featureDetectorDesc =>
-      'Real-time on-device object detection using TFLite';
+      'Point your camera to detect and hear objects around you in real time';
 
   @override
   String get featureAnalyzerTitle => 'AI Image Analyzer';
 
   @override
   String get featureAnalyzerDesc =>
-      'In-depth visual understanding and scene description via AI';
+      'Take or choose a photo to hear a detailed description of the scene';
 
   @override
   String get featureSettingsTitle => 'Settings & Profile';
@@ -79,8 +79,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detectorScreenTitle => 'Real-Time Object Detector';
 
   @override
-  String get detectorPlaceholderMessage =>
-      'TFLite Live Camera Feed will stream here';
+  String get detectorPlaceholderMessage => 'Live camera feed will appear here';
 
   @override
   String get startDetection => 'Start Detection';
@@ -178,12 +177,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startFeatureButton => 'Start';
 
   @override
+  String get clickToStart => 'Click to start';
+
+  @override
   String get detectorCardSemantic =>
-      'Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.';
+      'Live Object Detector: Point your camera to detect and hear objects around you in real time. Click to start.';
 
   @override
   String get analyzerCardSemantic =>
-      'AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.';
+      'AI Image Analyzer: Take or choose a photo to hear a detailed description of the scene. Click to start.';
 
   @override
   String get emailNotProvided => 'No email provided';
@@ -193,4 +195,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordVisibilityToggleSemantic => 'Toggle password visibility';
+
+  @override
+  String get signUpTitle => 'Create Account';
+
+  @override
+  String get signUpSubtitle =>
+      'Join Vision Companion for assistive vision support';
+
+  @override
+  String get signUpButton => 'Create Account';
+
+  @override
+  String get nameLabel => 'Full Name';
+
+  @override
+  String get nameHint => 'Enter your full name';
+
+  @override
+  String get nameRequired => 'Please enter your name';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your password';
+
+  @override
+  String get confirmPasswordRequired => 'Please confirm your password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign In';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? Sign Up';
+
+  @override
+  String get switchToSignUpSemantic => 'Switch to Sign Up form';
+
+  @override
+  String get switchToSignInSemantic => 'Switch to Sign In form';
+
+  @override
+  String get authErrorEmailAlreadyInUse =>
+      'An account already exists with this email address.';
+
+  @override
+  String get authErrorWeakPassword =>
+      'Password is too weak. Please use at least 6 characters.';
+
+  @override
+  String get splashTitle => 'Vision Companion';
+
+  @override
+  String get splashSubtitle => 'AI Assistive Companion';
+
+  @override
+  String get splashWelcomeText =>
+      'Welcome! Please choose your preferred language to continue.';
+
+  @override
+  String get selectLanguagePrompt => 'Choose Language / भाषा चुनें';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get continueButtonSemantic => 'Continue to application';
+
+  @override
+  String languageSelectedSemantic(String language) {
+    return '$language selected';
+  }
 }

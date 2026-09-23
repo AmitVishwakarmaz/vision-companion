@@ -10,28 +10,27 @@ class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit({this.prefs})
       : super(const SettingsState(
           locale: Locale(AppConstants.localeEn),
-          themeMode: ThemeMode.system,
+          themeMode: ThemeMode.light,
         )) {
     _loadPreferences();
   }
+
+  bool get hasSelectedLanguage =>
+      prefs?.getBool(AppConstants.prefHasSelectedLanguage) ?? false;
 
   void _loadPreferences() {
     if (prefs == null) return;
 
     final langCode = prefs!.getString(AppConstants.prefLanguageCode) ?? AppConstants.localeEn;
-    final themeName = prefs!.getString(AppConstants.prefThemeMode);
-
-    ThemeMode loadedMode = ThemeMode.system;
-    if (themeName == ThemeMode.light.name) {
-      loadedMode = ThemeMode.light;
-    } else if (themeName == ThemeMode.dark.name) {
-      loadedMode = ThemeMode.dark;
-    }
 
     emit(SettingsState(
       locale: Locale(langCode),
-      themeMode: loadedMode,
+      themeMode: ThemeMode.light,
     ));
+  }
+
+  Future<void> confirmLanguageSelection() async {
+    await prefs?.setBool(AppConstants.prefHasSelectedLanguage, true);
   }
 
   Future<void> setLocale(Locale newLocale) async {

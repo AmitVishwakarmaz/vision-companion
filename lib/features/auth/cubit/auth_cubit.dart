@@ -15,8 +15,8 @@ class AuthCubit extends Cubit<AuthState> {
               ? Authenticated.fromFirebaseUser(authRepository.currentUser!)
               : const Unauthenticated(),
         ) {
-    _initAuthListener();
-  }
+      _initAuthListener();
+    }
 
   void _initAuthListener() {
     _authSubscription = _authRepository.authStateChanges.listen((user) {
@@ -32,6 +32,29 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const Loading());
     try {
       final credential = await _authRepository.signInWithEmail(email, password);
+      final user = credential?.user;
+      if (user != null) {
+        emit(Authenticated.fromFirebaseUser(user));
+      }
+    } on AuthFailure catch (failure) {
+      emit(AuthError(failure));
+    } catch (e) {
+      emit(AuthError(AuthFailure.generic(e.toString())));
+    }
+  }
+
+  Future<void> signUpWithEmail(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
+    emit(const Loading());
+    try {
+      final credential = await _authRepository.signUpWithEmail(
+        email,
+        password,
+        displayName: displayName,
+      );
       final user = credential?.user;
       if (user != null) {
         emit(Authenticated.fromFirebaseUser(user));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
@@ -179,6 +180,8 @@ class HomeScreen extends StatelessWidget {
               child: Text(l10n.appTitle),
             ),
             actions: [
+              const LanguageToggleButton(),
+              const SizedBox(width: 4),
               // Profile Avatar Button
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
@@ -215,22 +218,9 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        theme.colorScheme.secondary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.black,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(60),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    border: Border.all(color: Colors.black, width: 2),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,8 +241,8 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         l10n.subtitleAssistive,
-                        style: TextStyle(
-                          color: Colors.white.withAlpha(220),
+                        style: const TextStyle(
+                          color: Color(0xFFE0E0E0),
                           fontSize: 14,
                         ),
                       ),
@@ -266,10 +256,9 @@ class HomeScreen extends StatelessWidget {
                 _HomeFeatureCard(
                   title: l10n.featureDetectorTitle,
                   description: l10n.featureDetectorDesc,
+                  actionPrompt: l10n.clickToStart,
                   semanticLabel: l10n.detectorCardSemantic,
-                  buttonLabel: '${l10n.startFeatureButton} ${l10n.featureDetectorTitle}',
                   icon: Icons.camera_alt_rounded,
-                  color: theme.colorScheme.primary,
                   onTap: () => context.push(AppConstants.routeDetector),
                 ),
                 const SizedBox(height: 20),
@@ -278,10 +267,9 @@ class HomeScreen extends StatelessWidget {
                 _HomeFeatureCard(
                   title: l10n.featureAnalyzerTitle,
                   description: l10n.featureAnalyzerDesc,
+                  actionPrompt: l10n.clickToStart,
                   semanticLabel: l10n.analyzerCardSemantic,
-                  buttonLabel: '${l10n.startFeatureButton} ${l10n.featureAnalyzerTitle}',
                   icon: Icons.auto_awesome_rounded,
-                  color: theme.colorScheme.secondary,
                   onTap: () => context.push(AppConstants.routeAnalyzer),
                 ),
               ],
@@ -296,37 +284,34 @@ class HomeScreen extends StatelessWidget {
 class _HomeFeatureCard extends StatelessWidget {
   final String title;
   final String description;
+  final String actionPrompt;
   final String semanticLabel;
-  final String buttonLabel;
   final IconData icon;
-  final Color color;
   final VoidCallback onTap;
 
   const _HomeFeatureCard({
     required this.title,
     required this.description,
+    required this.actionPrompt,
     required this.semanticLabel,
-    required this.buttonLabel,
     required this.icon,
-    required this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Semantics(
       label: semanticLabel,
       button: true,
       child: Card(
-        elevation: 3,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: color.withAlpha(60),
-            width: 1.5,
+          side: const BorderSide(
+            color: Colors.black,
+            width: 2,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -337,7 +322,7 @@ class _HomeFeatureCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Icon badge + Title
+                // Top Row: Icon badge + Title + Arrow indicator
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -345,12 +330,12 @@ class _HomeFeatureCard extends StatelessWidget {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: color.withAlpha(30),
+                        color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
                         icon,
-                        color: color,
+                        color: Colors.white,
                         size: 28,
                       ),
                     ),
@@ -361,49 +346,56 @@ class _HomeFeatureCard extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 20,
+                      color: Colors.black,
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
-                // Description
+                // Simple Description (No TFLite / technical jargon)
                 Text(
                   description,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withAlpha(180),
+                    color: const Color(0xFF424242),
                     height: 1.4,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Start Button with minimum 48x48 dp touch target
-                Semantics(
-                  button: true,
-                  label: buttonLabel,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 48),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: color,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 1,
+                // Click / Tap To Start Banner
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 1.2),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.touch_app_rounded,
+                        size: 18,
+                        color: Colors.black,
                       ),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 22),
-                      label: Text(
-                        l10n.startFeatureButton,
+                      const SizedBox(width: 8),
+                      Text(
+                        actionPrompt,
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
-                      onPressed: onTap,
-                    ),
+                    ],
                   ),
                 ),
               ],

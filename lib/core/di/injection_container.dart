@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vision_companion/core/constants/app_constants.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
+import 'package:vision_companion/features/history/repositories/history_repository.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 
 final GetIt sl = GetIt.instance;
@@ -18,6 +20,7 @@ Future<void> initDependencies({
   FirebaseFirestore? firestore,
   GoogleSignIn? googleSignIn,
   AuthRepository? authRepository,
+  HistoryRepository? historyRepository,
 }) async {
   // External: SharedPreferences
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -50,6 +53,13 @@ Future<void> initDependencies({
 
   // External: GoogleSignIn
   final google = googleSignIn ?? GoogleSignIn.instance;
+  if (googleSignIn == null) {
+    try {
+      await google
+          .initialize(serverClientId: AppConstants.googleServerClientId)
+          .catchError((_) {});
+    } catch (_) {}
+  }
   sl.registerLazySingleton<GoogleSignIn>(() => google);
 
   // Repositories
@@ -60,6 +70,13 @@ Future<void> initDependencies({
       );
   sl.registerLazySingleton<AuthRepository>(() => repository);
 
+  final history = historyRepository ??
+      FirestoreHistoryRepository(
+        firestore: sl.isRegistered<FirebaseFirestore>() ? sl<FirebaseFirestore>() : null,
+        firebaseAuth: sl.isRegistered<FirebaseAuth>() ? sl<FirebaseAuth>() : null,
+      );
+  sl.registerLazySingleton<HistoryRepository>(() => history);
+
   // Feature Cubits
   sl.registerLazySingleton<SettingsCubit>(
     () => SettingsCubit(prefs: sl<SharedPreferences>()),
@@ -69,7 +86,11 @@ Future<void> initDependencies({
     () => AuthCubit(authRepository: sl<AuthRepository>()),
   );
 
-  sl.registerFactory<DetectorCubit>(() => DetectorCubit());
+  sl.registerFactory<DetectorCubit>(
+    () => DetectorCubit(historyRepository: sl<HistoryRepository>()),
+  );
 
-  sl.registerFactory<AnalyzerCubit>(() => AnalyzerCubit());
+  sl.registerFactory<AnalyzerCubit>(
+    () => AnalyzerCubit(historyRepository: sl<HistoryRepository>()),
+  );
 }

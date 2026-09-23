@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vision_companion/core/widgets/language_toggle_button.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_state.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
@@ -13,8 +14,20 @@ class AnalyzerPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.analyzerScreenTitle),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          l10n.analyzerScreenTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: LanguageToggleButton(),
+          ),
+        ],
       ),
       body: BlocConsumer<AnalyzerCubit, AnalyzerState>(
         listener: (context, state) {
@@ -41,8 +54,8 @@ class AnalyzerPage extends StatelessWidget {
                       color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(60),
-                        width: 1.5,
+                        color: Colors.black,
+                        width: 2,
                       ),
                     ),
                     child: Center(

@@ -10,6 +10,7 @@ import 'package:vision_companion/core/router/app_router.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'package:vision_companion/features/home/home_screen.dart';
+import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
 
 class MockUser extends Fake implements User {
@@ -58,6 +59,13 @@ class FakeHomeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<UserCredential?> signUpWithEmail(String email, String password, {String? displayName}) async {
+    final user = MockUser(email: email, displayName: displayName ?? email.split('@').first);
+    emitUser(user);
+    return FakeUserCredential(user);
+  }
+
+  @override
   Future<UserCredential?> signInWithGoogle() async {
     final user = MockUser(email: 'google@example.com', displayName: 'Google User');
     emitUser(user);
@@ -100,8 +108,11 @@ void main() {
   });
 
   Widget buildTestWidget({required AuthCubit cubit, GoRouter? router}) {
-    return BlocProvider<AuthCubit>.value(
-      value: cubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>.value(value: cubit),
+        BlocProvider<SettingsCubit>.value(value: sl<SettingsCubit>()),
+      ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -126,10 +137,14 @@ void main() {
     expect(find.text('AI Image Analyzer'), findsOneWidget);
     expect(find.text('Settings & Preferences'), findsNothing);
 
-    // 3. Verify Start buttons on both cards
-    expect(find.text('Start'), findsNWidgets(2));
+    // 3. Verify Click to start prompt on both cards
+    expect(find.text('Click to start'), findsNWidgets(2));
 
-    // 4. Verify profile avatar has correct semantic label
+    // 4. Verify simple, jargon-free descriptions (No TFLite)
+    expect(find.text('Point your camera to detect and hear objects around you in real time'), findsOneWidget);
+    expect(find.text('Take or choose a photo to hear a detailed description of the scene'), findsOneWidget);
+
+    // 5. Verify profile avatar has correct semantic label
     final profileSemanticFinder = find.bySemanticsLabel('Profile: alex, tap to open menu');
     expect(profileSemanticFinder, findsOneWidget);
   });
@@ -165,13 +180,14 @@ void main() {
     await tester.pumpWidget(buildTestWidget(cubit: authCubit));
     await tester.pumpAndSettle();
 
-    // Find Start buttons
-    final startButtons = tester.widgetList<ElevatedButton>(find.byType(ElevatedButton));
-    for (final button in startButtons) {
-      final minSize = button.style?.minimumSize?.resolve({});
-      if (minSize != null) {
-        expect(minSize.height, greaterThanOrEqualTo(48.0));
-      }
-    }
+    // Find Live Object Detector card tap target
+    final detectorCard = tester.getRect(find.widgetWithText(InkWell, 'Live Object Detector'));
+    expect(detectorCard.height, greaterThanOrEqualTo(48.0));
+    expect(detectorCard.width, greaterThanOrEqualTo(48.0));
+
+    // Find AI Image Analyzer card tap target
+    final analyzerCard = tester.getRect(find.widgetWithText(InkWell, 'AI Image Analyzer'));
+    expect(analyzerCard.height, greaterThanOrEqualTo(48.0));
+    expect(analyzerCard.width, greaterThanOrEqualTo(48.0));
   });
 }

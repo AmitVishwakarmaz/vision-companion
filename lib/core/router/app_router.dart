@@ -12,7 +12,9 @@ import 'package:vision_companion/features/auth/pages/login_page.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
 import 'package:vision_companion/features/detector/pages/detector_page.dart';
 import 'package:vision_companion/features/home/home_screen.dart';
+import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 import 'package:vision_companion/features/settings/pages/settings_page.dart';
+import 'package:vision_companion/features/splash/pages/splash_page.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -42,28 +44,59 @@ class AppRouter {
     _router = null;
   }
 
-  static GoRouter createRouter(AuthCubit authCubit) {
+  static GoRouter createRouter(
+    AuthCubit authCubit, {
+    String? initialLocation,
+  }) {
+    final settingsCubit = sl.isRegistered<SettingsCubit>() ? sl<SettingsCubit>() : null;
+    final bool hasSelectedLanguage = settingsCubit?.hasSelectedLanguage ?? false;
+    final bool isAuthenticated = authCubit.state is Authenticated;
+
+    final String defaultLocation = initialLocation ??
+        (!hasSelectedLanguage
+            ? AppConstants.routeSplash
+            : (isAuthenticated ? AppConstants.routeHome : AppConstants.routeLogin));
+
     return GoRouter(
-      initialLocation: AppConstants.routeHome,
+      initialLocation: defaultLocation,
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authCubit.state;
-        final bool isAuthenticated = authState is Authenticated;
-        final bool isGoingToLogin = state.matchedLocation == AppConstants.routeLogin;
+        final bool isAuth = authState is Authenticated;
+        final String loc = state.matchedLocation;
+        final bool isSplash = loc == AppConstants.routeSplash;
+        final bool isLogin = loc == AppConstants.routeLogin;
+
+        final cubit = sl.isRegistered<SettingsCubit>() ? sl<SettingsCubit>() : null;
+        final bool hasSelectedLang = cubit?.hasSelectedLanguage ?? false;
+
+        // If language has not been selected yet, send to splash
+        if (!hasSelectedLang && !isSplash) {
+          return AppConstants.routeSplash;
+        }
+
+        // Splash screen is accessible
+        if (isSplash) {
+          return null;
+        }
 
         // Unauthenticated users trying to access protected routes -> redirect to login
-        if (!isAuthenticated && !isGoingToLogin) {
+        if (!isAuth && !isLogin) {
           return AppConstants.routeLogin;
         }
 
         // Authenticated users trying to access login -> redirect to home
-        if (isAuthenticated && isGoingToLogin) {
+        if (isAuth && isLogin) {
           return AppConstants.routeHome;
         }
 
         return null;
       },
       routes: [
+        GoRoute(
+          path: AppConstants.routeSplash,
+          builder: (context, state) => const SplashPage(),
+        ),
         GoRoute(
           path: AppConstants.routeHome,
           builder: (context, state) => const HomeScreen(),

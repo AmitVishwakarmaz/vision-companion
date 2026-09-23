@@ -26,13 +26,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get featureDetectorDesc =>
-      'TFLite के माध्यम से रीयल-टाइम ऑन-डिवाइस ऑब्जेक्ट डिटेक्शन';
+      'अपने आस-पास की वस्तुओं का पता लगाने और सुनने के लिए कैमरा चालू करें';
 
   @override
   String get featureAnalyzerTitle => 'AI छवि विश्लेषक';
 
   @override
-  String get featureAnalyzerDesc => 'AI द्वारा गहन दृश्य समझ और विवरण';
+  String get featureAnalyzerDesc =>
+      'दृश्य का विस्तृत आवाज़ विवरण पाने के लिए फोटो लें या चुनें';
 
   @override
   String get featureSettingsTitle => 'सेटिंग्स और प्रोफ़ाइल';
@@ -78,8 +79,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get detectorScreenTitle => 'रीयल-टाइम ऑब्जेक्ट डिटेक्टर';
 
   @override
-  String get detectorPlaceholderMessage =>
-      'TFLite लाइव कैमरा फीड यहां दिखाई देगा';
+  String get detectorPlaceholderMessage => 'लाइव कैमरा फीड यहां दिखाई देगा';
 
   @override
   String get startDetection => 'डिटेक्शन शुरू करें';
@@ -178,12 +178,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get startFeatureButton => 'शुरू करें';
 
   @override
+  String get clickToStart => 'शुरू करने के लिए क्लिक करें';
+
+  @override
   String get detectorCardSemantic =>
-      'लाइव वस्तु संसूचक: TFLite के माध्यम से रीयल-टाइम ऑन-डिवाइस ऑब्जेक्ट डिटेक्शन। शुरू करने के लिए दो बार टैप करें।';
+      'लाइव वस्तु संसूचक: अपने आस-पास की वस्तुओं का पता लगाने और सुनने के लिए कैमरा चालू करें। शुरू करने के लिए क्लिक करें।';
 
   @override
   String get analyzerCardSemantic =>
-      'AI छवि विश्लेषक: AI द्वारा गहन दृश्य समझ और विवरण। शुरू करने के लिए दो बार टैप करें।';
+      'AI छवि विश्लेषक: दृश्य का विस्तृत आवाज़ विवरण पाने के लिए फोटो लें या चुनें। शुरू करने के लिए क्लिक करें।';
 
   @override
   String get emailNotProvided => 'कोई ईमेल नहीं दिया गया';
@@ -193,4 +196,82 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get passwordVisibilityToggleSemantic => 'पासवर्ड दृश्यता बदलें';
+
+  @override
+  String get signUpTitle => 'खाता बनाएं';
+
+  @override
+  String get signUpSubtitle =>
+      'सहायक विज़न सहायता के लिए विज़न कम्पेनियन से जुड़ें';
+
+  @override
+  String get signUpButton => 'खाता बनाएं';
+
+  @override
+  String get nameLabel => 'पूरा नाम';
+
+  @override
+  String get nameHint => 'अपना पूरा नाम दर्ज करें';
+
+  @override
+  String get nameRequired => 'कृपया अपना नाम दर्ज करें';
+
+  @override
+  String get confirmPasswordLabel => 'पासवर्ड की पुष्टि करें';
+
+  @override
+  String get confirmPasswordHint => 'अपना पासवर्ड पुनः दर्ज करें';
+
+  @override
+  String get confirmPasswordRequired => 'कृपया पासवर्ड की पुष्टि करें';
+
+  @override
+  String get passwordsDoNotMatch => 'पासवर्ड मेल नहीं खाते';
+
+  @override
+  String get passwordTooShort => 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए';
+
+  @override
+  String get alreadyHaveAccount => 'पहले से खाता है? साइन इन करें';
+
+  @override
+  String get dontHaveAccount => 'खाता नहीं है? साइन अप करें';
+
+  @override
+  String get switchToSignUpSemantic => 'साइन अप फॉर्म पर स्विच करें';
+
+  @override
+  String get switchToSignInSemantic => 'साइन इन फॉर्म पर स्विच करें';
+
+  @override
+  String get authErrorEmailAlreadyInUse =>
+      'इस ईमेल पते से पहले से ही एक खाता मौजूद है।';
+
+  @override
+  String get authErrorWeakPassword =>
+      'पासवर्ड बहुत कमजोर है। कृपया कम से कम 6 अक्षर उपयोग करें।';
+
+  @override
+  String get splashTitle => 'विज़न कम्पेनियन';
+
+  @override
+  String get splashSubtitle => 'एआई सहायक साथी';
+
+  @override
+  String get splashWelcomeText =>
+      'स्वागत है! जारी रखने के लिए कृपया अपनी पसंदीदा भाषा चुनें।';
+
+  @override
+  String get selectLanguagePrompt => 'भाषा चुनें / Choose Language';
+
+  @override
+  String get continueButton => 'आगे बढ़ें';
+
+  @override
+  String get continueButtonSemantic => 'ऐप में आगे बढ़ें';
+
+  @override
+  String languageSelectedSemantic(String language) {
+    return '$language चयनित है';
+  }
 }

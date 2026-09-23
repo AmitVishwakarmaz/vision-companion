@@ -9,6 +9,7 @@ import 'package:vision_companion/core/router/app_router.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
+import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 import 'package:vision_companion/l10n/app_localizations.dart';
 
 class StubAuthRepository implements AuthRepository {
@@ -22,6 +23,9 @@ class StubAuthRepository implements AuthRepository {
   Future<UserCredential?> signInWithEmail(String email, String password) async => null;
 
   @override
+  Future<UserCredential?> signUpWithEmail(String email, String password, {String? displayName}) async => null;
+
+  @override
   Future<UserCredential?> signInWithGoogle() async => null;
 
   @override
@@ -30,7 +34,9 @@ class StubAuthRepository implements AuthRepository {
 
 void main() {
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      AppConstants.prefHasSelectedLanguage: true,
+    });
     await sl.reset();
     await initDependencies(authRepository: StubAuthRepository());
   });
@@ -46,11 +52,17 @@ void main() {
     // Verify cubit is unauthenticated
     expect(authCubit.state, isA<Unauthenticated>());
 
-    final router = AppRouter.createRouter(authCubit);
+    final router = AppRouter.createRouter(
+      authCubit,
+      initialLocation: AppConstants.routeHome,
+    );
 
     await tester.pumpWidget(
-      BlocProvider<AuthCubit>.value(
-        value: authCubit,
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<SettingsCubit>.value(value: sl<SettingsCubit>()),
+        ],
         child: MaterialApp.router(
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -68,11 +80,17 @@ void main() {
   testWidgets('Unauthenticated user cannot access protected routes like /detector',
       (WidgetTester tester) async {
     final authCubit = sl<AuthCubit>();
-    final router = AppRouter.createRouter(authCubit);
+    final router = AppRouter.createRouter(
+      authCubit,
+      initialLocation: AppConstants.routeHome,
+    );
 
     await tester.pumpWidget(
-      BlocProvider<AuthCubit>.value(
-        value: authCubit,
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<SettingsCubit>.value(value: sl<SettingsCubit>()),
+        ],
         child: MaterialApp.router(
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -87,6 +105,60 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify redirected back to /login
+    expect(router.routeInformationProvider.value.uri.path, equals(AppConstants.routeLogin));
+    expect(find.text('Sign In'), findsWidgets);
+  });
+
+  testWidgets('App opens on splash screen when language is not yet selected',
+      (WidgetTester tester) async {
+    await sl<SharedPreferences>().setBool(AppConstants.prefHasSelectedLanguage, false);
+
+    final authCubit = sl<AuthCubit>();
+    final router = AppRouter.createRouter(authCubit);
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<SettingsCubit>.value(value: sl<SettingsCubit>()),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify app starts at /splash with language selection
+    expect(router.routeInformationProvider.value.uri.path, equals(AppConstants.routeSplash));
+    expect(find.text('Vision Companion'), findsWidgets);
+    expect(find.text('English'), findsWidgets);
+    expect(find.text('हिन्दी (Hindi)'), findsWidgets);
+  });
+
+  testWidgets('App skips splash and opens login directly when language is already selected',
+      (WidgetTester tester) async {
+    final authCubit = sl<AuthCubit>();
+    final router = AppRouter.createRouter(authCubit);
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<SettingsCubit>.value(value: sl<SettingsCubit>()),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify app skips splash and goes straight to /login
     expect(router.routeInformationProvider.value.uri.path, equals(AppConstants.routeLogin));
     expect(find.text('Sign In'), findsWidgets);
   });

@@ -31,6 +31,14 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<UserCredential?> signUpWithEmail(String email, String password, {String? displayName}) async {
+    if (shouldThrow) {
+      throw AuthFailure(failureType);
+    }
+    return null;
+  }
+
+  @override
   Future<UserCredential?> signInWithGoogle() async {
     if (shouldThrow) {
       throw AuthFailure(failureType);
@@ -154,6 +162,35 @@ void main() {
         FirebaseAuthException(code: 'too-many-requests'),
       );
       expect(tooMany.type, equals(AuthFailureType.tooManyRequests));
+
+      final emailInUse = AuthFailure.fromFirebaseException(
+        FirebaseAuthException(code: 'email-already-in-use'),
+      );
+      expect(emailInUse.type, equals(AuthFailureType.emailAlreadyInUse));
+
+      final weakPass = AuthFailure.fromFirebaseException(
+        FirebaseAuthException(code: 'weak-password'),
+      );
+      expect(weakPass.type, equals(AuthFailureType.weakPassword));
+    });
+
+    test('emits Loading then AuthError on signUpWithEmail failure', () async {
+      fakeRepo.shouldThrow = true;
+      fakeRepo.failureType = AuthFailureType.emailAlreadyInUse;
+
+      final states = <AuthState>[];
+      final subscription = cubit.stream.listen(states.add);
+
+      await cubit.signUpWithEmail('test@example.com', 'password123', displayName: 'Test User');
+      await pumpEventQueue();
+
+      expect(states.length, 2);
+      expect(states[0], isA<Loading>());
+      expect(states[1], isA<AuthError>());
+      final error = states[1] as AuthError;
+      expect(error.failure.type, equals(AuthFailureType.emailAlreadyInUse));
+
+      await subscription.cancel();
     });
   });
 }

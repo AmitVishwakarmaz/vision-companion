@@ -20,17 +20,17 @@
   "@featureDetectorTitle": {
     "description": "Title for feature 1"
   },
-  "featureDetectorDesc": "Real-time on-device object detection using TFLite",
+  "featureDetectorDesc": "Point your camera to detect and hear objects around you in real time",
   "@featureDetectorDesc": {
-    "description": "Description for feature 1"
+    "description": "Simple description for feature 1"
   },
   "featureAnalyzerTitle": "AI Image Analyzer",
   "@featureAnalyzerTitle": {
     "description": "Title for feature 2"
   },
-  "featureAnalyzerDesc": "In-depth visual understanding and scene description via AI",
+  "featureAnalyzerDesc": "Take or choose a photo to hear a detailed description of the scene",
   "@featureAnalyzerDesc": {
-    "description": "Description for feature 2"
+    "description": "Simple description for feature 2"
   },
   "featureSettingsTitle": "Settings & Profile",
   "@featureSettingsTitle": {
@@ -88,7 +88,7 @@
   "@detectorScreenTitle": {
     "description": "Title for detector screen"
   },
-  "detectorPlaceholderMessage": "TFLite Live Camera Feed will stream here",
+  "detectorPlaceholderMessage": "Live camera feed will appear here",
   "@detectorPlaceholderMessage": {
     "description": "Placeholder message for detector screen"
   },
@@ -218,11 +218,15 @@
   "@startFeatureButton": {
     "description": "Button label to start a feature"
   },
-  "detectorCardSemantic": "Live Object Detector: Real-time on-device object detection using TFLite. Double tap to start.",
+  "clickToStart": "Click to start",
+  "@clickToStart": {
+    "description": "Text prompt on feature card indicating user can tap anywhere to start"
+  },
+  "detectorCardSemantic": "Live Object Detector: Point your camera to detect and hear objects around you in real time. Click to start.",
   "@detectorCardSemantic": {
     "description": "Accessibility announcement for object detector card"
   },
-  "analyzerCardSemantic": "AI Image Analyzer: In-depth visual understanding and scene description via AI. Double tap to start.",
+  "analyzerCardSemantic": "AI Image Analyzer: Take or choose a photo to hear a detailed description of the scene. Click to start.",
   "@analyzerCardSemantic": {
     "description": "Accessibility announcement for AI analyzer card"
   },
@@ -237,5 +241,106 @@
   "passwordVisibilityToggleSemantic": "Toggle password visibility",
   "@passwordVisibilityToggleSemantic": {
     "description": "Accessibility label for password toggle button"
+  },
+  "signUpTitle": "Create Account",
+  "@signUpTitle": {
+    "description": "Title for sign up screen"
+  },
+  "signUpSubtitle": "Join Vision Companion for assistive vision support",
+  "@signUpSubtitle": {
+    "description": "Subtitle for sign up screen"
+  },
+  "signUpButton": "Create Account",
+  "@signUpButton": {
+    "description": "Text for create account button"
+  },
+  "nameLabel": "Full Name",
+  "@nameLabel": {
+    "description": "Label for name field"
+  },
+  "nameHint": "Enter your full name",
+  "@nameHint": {
+    "description": "Hint for name field"
+  },
+  "nameRequired": "Please enter your name",
+  "@nameRequired": {
+    "description": "Validation error for empty name"
+  },
+  "confirmPasswordLabel": "Confirm Password",
+  "@confirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+  "confirmPasswordHint": "Re-enter your password",
+  "@confirmPasswordHint": {
+    "description": "Hint for confirm password field"
+  },
+  "confirmPasswordRequired": "Please confirm your password",
+  "@confirmPasswordRequired": {
+    "description": "Validation error for empty confirm password"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Validation error when passwords differ"
+  },
+  "passwordTooShort": "Password must be at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Validation error when password is under 6 characters"
+  },
+  "alreadyHaveAccount": "Already have an account? Sign In",
+  "@alreadyHaveAccount": {
+    "description": "Prompt to switch to sign in mode"
+  },
+  "dontHaveAccount": "Don't have an account? Sign Up",
+  "@dontHaveAccount": {
+    "description": "Prompt to switch to sign up mode"
+  },
+  "switchToSignUpSemantic": "Switch to Sign Up form",
+  "@switchToSignUpSemantic": {
+    "description": "Accessibility label to switch to sign up form"
+  },
+  "switchToSignInSemantic": "Switch to Sign In form",
+  "@switchToSignInSemantic": {
+    "description": "Accessibility label to switch to sign in form"
+  },
+  "authErrorEmailAlreadyInUse": "An account already exists with this email address.",
+  "@authErrorEmailAlreadyInUse": {
+    "description": "Error message when email is already registered"
+  },
+  "authErrorWeakPassword": "Password is too weak. Please use at least 6 characters.",
+  "@authErrorWeakPassword": {
+    "description": "Error message when password is too weak"
+  },
+  "splashTitle": "Vision Companion",
+  "@splashTitle": {
+    "description": "App title on splash screen"
+  },
+  "splashSubtitle": "AI Assistive Companion",
+  "@splashSubtitle": {
+    "description": "App subtitle on splash screen"
+  },
+  "splashWelcomeText": "Welcome! Please choose your preferred language to continue.",
+  "@splashWelcomeText": {
+    "description": "Prompt on splash screen to choose language"
+  },
+  "selectLanguagePrompt": "Choose Language / भाषा चुनें",
+  "@selectLanguagePrompt": {
+    "description": "Header for language selection"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "continueButtonSemantic": "Continue to application",
+  "@continueButtonSemantic": {
+    "description": "Semantic announcement for continue button"
+  },
+  "languageSelectedSemantic": "{language} selected",
+  "@languageSelectedSemantic": {
+    "description": "Semantic announcement when language is selected",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
   }
 }

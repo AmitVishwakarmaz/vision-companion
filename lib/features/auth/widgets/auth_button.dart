@@ -30,10 +30,26 @@ class AuthButton extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 48),
         child: isOutlined
             ? OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.black, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 onPressed: isLoading ? null : onPressed,
                 child: _buildChild(context),
               )
             : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
                 onPressed: isLoading ? null : onPressed,
                 child: _buildChild(context),
               ),
@@ -43,12 +59,14 @@ class AuthButton extends StatelessWidget {
 
   Widget _buildChild(BuildContext context) {
     if (isLoading) {
-      return const SizedBox(
+      return SizedBox(
         height: 20,
         width: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            isOutlined ? Colors.black : Colors.white,
+          ),
         ),
       );
     }
