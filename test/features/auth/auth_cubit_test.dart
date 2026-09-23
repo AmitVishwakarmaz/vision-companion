@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
+import 'package:vision_companion/core/services/crashlytics_service.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
@@ -59,13 +61,63 @@ class FakeAuthRepository implements AuthRepository {
   }
 }
 
+class FakeCrashlyticsService implements CrashlyticsService {
+  String? userId;
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> log(String message) async {}
+
+  @override
+  Future<void> recordError(dynamic exception, StackTrace? stack, {dynamic reason, Iterable<Object> information = const [], bool fatal = false}) async {}
+
+  @override
+  Future<void> setCustomKey(String key, Object value) async {}
+
+  @override
+  Future<void> setUserId(String userId) async {
+    this.userId = userId;
+  }
+}
+
+class FakeAnalyticsService implements AnalyticsService {
+  String? userId;
+
+  @override
+  Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {}
+
+  @override
+  Future<void> logDetectionCompleted({required int count, required List<String> categories, int? latencyMs}) async {}
+
+  @override
+  Future<void> logFeatureOpened(String featureName) async {}
+
+  @override
+  Future<void> logImageAnalyzed({String? model, int? latencyMs, int? tagsCount}) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    this.userId = userId;
+  }
+}
+
 void main() {
   late FakeAuthRepository fakeRepo;
+  late FakeCrashlyticsService fakeCrashlytics;
+  late FakeAnalyticsService fakeAnalytics;
   late AuthCubit cubit;
 
   setUp(() {
     fakeRepo = FakeAuthRepository();
-    cubit = AuthCubit(authRepository: fakeRepo);
+    fakeCrashlytics = FakeCrashlyticsService();
+    fakeAnalytics = FakeAnalyticsService();
+    cubit = AuthCubit(
+      authRepository: fakeRepo,
+      crashlyticsService: fakeCrashlytics,
+      analyticsService: fakeAnalytics,
+    );
   });
 
   tearDown(() async {
@@ -138,6 +190,13 @@ void main() {
       expect(states, contains(isA<Unauthenticated>()));
 
       await subscription.cancel();
+    });
+
+    test('syncs user ID with Crashlytics and Analytics on auth state changes', () async {
+      fakeRepo.emitAuthState(null);
+      await pumpEventQueue();
+      expect(fakeCrashlytics.userId, equals(''));
+      expect(fakeAnalytics.userId, isNull);
     });
   });
 

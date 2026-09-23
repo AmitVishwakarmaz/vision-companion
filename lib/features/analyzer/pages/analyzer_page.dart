@@ -24,6 +24,11 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AnalyzerCubit>().init();
+      }
+    });
     _initializeCamera();
   }
 

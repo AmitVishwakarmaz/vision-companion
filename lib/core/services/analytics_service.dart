@@ -13,6 +13,7 @@ abstract class AnalyticsService {
     int? latencyMs,
     int? tagsCount,
   });
+  Future<void> setUserId(String? userId);
   Future<void> logCustomEvent(String name, {Map<String, Object>? parameters});
 }
 
@@ -79,6 +80,15 @@ class FirebaseAnalyticsService implements AnalyticsService {
       );
     } catch (e) {
       debugPrint('Analytics notice (image_analyzed): $e');
+    }
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    try {
+      await _instance?.setUserId(id: userId);
+    } catch (e) {
+      debugPrint('Analytics notice (setUserId): $e');
     }
   }
 

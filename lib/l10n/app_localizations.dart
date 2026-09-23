@@ -811,6 +811,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{language} selected'**
   String languageSelectedSemantic(String language);
+
+  /// Label for account status in profile settings
+  ///
+  /// In en, this message translates to:
+  /// **'Account Status'**
+  String get accountStatusLabel;
+
+  /// Status text for logged in user
+  ///
+  /// In en, this message translates to:
+  /// **'Signed In'**
+  String get signedInStatus;
+
+  /// Status text for guest / unauthenticated user
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Mode'**
+  String get guestStatus;
+
+  /// Label for user ID in profile settings
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get userIdLabel;
+
+  /// Title for about section in settings
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutSectionTitle;
+
+  /// Label displaying application version
+  ///
+  /// In en, this message translates to:
+  /// **'Version 1.0.0'**
+  String get appVersionLabel;
+
+  /// Notice that Firebase Crashlytics is active for automatic crash reporting
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reporting active'**
+  String get crashReportingActive;
 }
 
 class _AppLocalizationsDelegate

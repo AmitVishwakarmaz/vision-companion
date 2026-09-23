@@ -1,25 +1,46 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
+import 'package:vision_companion/core/services/crashlytics_service.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
+  final CrashlyticsService? crashlyticsService;
+  final AnalyticsService? analyticsService;
   StreamSubscription<User?>? _authSubscription;
 
-  AuthCubit({required AuthRepository authRepository})
-      : _authRepository = authRepository,
+  AuthCubit({
+    required AuthRepository authRepository,
+    this.crashlyticsService,
+    this.analyticsService,
+  })  : _authRepository = authRepository,
         super(
           authRepository.currentUser != null
               ? Authenticated.fromFirebaseUser(authRepository.currentUser!)
               : const Unauthenticated(),
         ) {
-      _initAuthListener();
+    if (authRepository.currentUser != null) {
+      _syncUser(authRepository.currentUser);
     }
+    _initAuthListener();
+  }
+
+  void _syncUser(User? user) {
+    if (user != null) {
+      crashlyticsService?.setUserId(user.uid);
+      analyticsService?.setUserId(user.uid);
+    } else {
+      crashlyticsService?.setUserId('');
+      analyticsService?.setUserId(null);
+    }
+  }
 
   void _initAuthListener() {
     _authSubscription = _authRepository.authStateChanges.listen((user) {
+      _syncUser(user);
       if (user != null) {
         emit(Authenticated.fromFirebaseUser(user));
       } else {

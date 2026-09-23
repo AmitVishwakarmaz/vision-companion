@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
 import 'package:vision_companion/core/di/injection_container.dart';
 import 'package:vision_companion/core/router/app_router.dart';
+import 'package:vision_companion/core/services/crashlytics_service.dart';
 import 'package:vision_companion/core/theme/app_theme.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
@@ -41,6 +42,13 @@ Future<void> main() async {
 
   // Initialize Dependency Injection
   await initDependencies();
+
+  // Initialize Crashlytics automatic crash reporting
+  try {
+    await sl<CrashlyticsService>().initialize();
+  } catch (e) {
+    debugPrint('Crashlytics service startup notice: $e');
+  }
 
   runApp(const VisionCompanionApp());
 }

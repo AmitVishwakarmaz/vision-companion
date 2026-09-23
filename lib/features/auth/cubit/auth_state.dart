@@ -42,6 +42,8 @@ class Authenticated extends AuthState {
     );
   }
 
+  String get uid => userId;
+
   @override
   List<Object?> get props => [userId, email, displayName];
 }

@@ -42,6 +42,9 @@ class MockAnalyzerCubit extends Cubit<AnalyzerState> implements AnalyzerCubit {
   }
 
   @override
+  void init() {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

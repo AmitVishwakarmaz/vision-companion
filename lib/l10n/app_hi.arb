@@ -118,5 +118,12 @@
   "selectLanguagePrompt": "भाषा चुनें / Choose Language",
   "continueButton": "आगे बढ़ें",
   "continueButtonSemantic": "ऐप में आगे बढ़ें",
-  "languageSelectedSemantic": "{language} चयनित है"
+  "languageSelectedSemantic": "{language} चयनित है",
+  "accountStatusLabel": "खाता स्थिति",
+  "signedInStatus": "साइन इन हैं",
+  "guestStatus": "अतिथि मोड",
+  "userIdLabel": "उपयोगकर्ता आईडी",
+  "aboutSectionTitle": "ऐप के बारे में",
+  "appVersionLabel": "संस्करण 1.0.0",
+  "crashReportingActive": "क्रैश रिपोर्टिंग सक्रिय है"
 }

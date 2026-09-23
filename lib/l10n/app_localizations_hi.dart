@@ -469,4 +469,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String languageSelectedSemantic(String language) {
     return '$language चयनित है';
   }
+
+  @override
+  String get accountStatusLabel => 'खाता स्थिति';
+
+  @override
+  String get signedInStatus => 'साइन इन हैं';
+
+  @override
+  String get guestStatus => 'अतिथि मोड';
+
+  @override
+  String get userIdLabel => 'उपयोगकर्ता आईडी';
+
+  @override
+  String get aboutSectionTitle => 'ऐप के बारे में';
+
+  @override
+  String get appVersionLabel => 'संस्करण 1.0.0';
+
+  @override
+  String get crashReportingActive => 'क्रैश रिपोर्टिंग सक्रिय है';
 }

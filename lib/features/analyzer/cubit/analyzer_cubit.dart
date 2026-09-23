@@ -25,6 +25,11 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
   })  : visionService = visionService ?? groqService ?? GeminiVisionService(),
         super(const AnalyzerIdle());
 
+  /// Initializes the analyzer and logs feature_opened to Analytics.
+  void init() {
+    analyticsService?.logFeatureOpened('image_analyzer');
+  }
+
   /// Analyzes an image using Gemini (or Groq) Vision API.
   /// Never uploads or stores image in Firebase Storage.
   Future<void> analyzeImage(

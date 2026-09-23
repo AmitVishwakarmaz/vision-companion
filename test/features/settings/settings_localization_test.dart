@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
+import 'package:vision_companion/core/services/crashlytics_service.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
@@ -12,6 +14,12 @@ import 'package:vision_companion/l10n/app_localizations.dart';
 
 class MockAuthCubit extends Cubit<AuthState> implements AuthCubit {
   MockAuthCubit([AuthState? initial]) : super(initial ?? const Unauthenticated());
+
+  @override
+  CrashlyticsService? get crashlyticsService => null;
+
+  @override
+  AnalyticsService? get analyticsService => null;
 
   @override
   Future<void> signInWithEmail(String email, String password) async {}

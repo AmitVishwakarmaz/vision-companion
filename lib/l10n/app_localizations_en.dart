@@ -466,4 +466,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String languageSelectedSemantic(String language) {
     return '$language selected';
   }
+
+  @override
+  String get accountStatusLabel => 'Account Status';
+
+  @override
+  String get signedInStatus => 'Signed In';
+
+  @override
+  String get guestStatus => 'Guest Mode';
+
+  @override
+  String get userIdLabel => 'User ID';
+
+  @override
+  String get aboutSectionTitle => 'About';
+
+  @override
+  String get appVersionLabel => 'Version 1.0.0';
+
+  @override
+  String get crashReportingActive => 'Crash reporting active';
 }

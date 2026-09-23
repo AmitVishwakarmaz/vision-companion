@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
 import 'package:vision_companion/core/services/analytics_service.dart';
+import 'package:vision_companion/core/services/crashlytics_service.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/analyzer/services/gemini_vision_service.dart';
 import 'package:vision_companion/features/analyzer/services/groq_vision_service.dart';
@@ -28,6 +29,7 @@ Future<void> initDependencies({
   HistoryRepository? historyRepository,
   DetectorService? detectorService,
   AnalyticsService? analyticsService,
+  CrashlyticsService? crashlyticsService,
 }) async {
   // External: SharedPreferences
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -88,6 +90,10 @@ Future<void> initDependencies({
   final analytics = analyticsService ?? FirebaseAnalyticsService();
   sl.registerLazySingleton<AnalyticsService>(() => analytics);
 
+  // Crashlytics Service
+  final crashlytics = crashlyticsService ?? const FirebaseCrashlyticsService();
+  sl.registerLazySingleton<CrashlyticsService>(() => crashlytics);
+
   // Detector Service
   final detector = detectorService ?? LiveDetectorService();
   sl.registerLazySingleton<DetectorService>(() => detector);
@@ -98,7 +104,11 @@ Future<void> initDependencies({
   );
 
   sl.registerLazySingleton<AuthCubit>(
-    () => AuthCubit(authRepository: sl<AuthRepository>()),
+    () => AuthCubit(
+      authRepository: sl<AuthRepository>(),
+      crashlyticsService: sl<CrashlyticsService>(),
+      analyticsService: sl<AnalyticsService>(),
+    ),
   );
 
   sl.registerFactory<DetectorCubit>(

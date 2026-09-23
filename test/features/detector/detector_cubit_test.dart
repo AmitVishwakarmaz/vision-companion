@@ -127,6 +127,9 @@ class MockAnalyticsService implements AnalyticsService {
   }) async {}
 
   @override
+  Future<void> setUserId(String? userId) async {}
+
+  @override
   Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {}
 }
 

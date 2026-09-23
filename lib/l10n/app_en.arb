@@ -551,5 +551,33 @@
         "type": "String"
       }
     }
+  },
+  "accountStatusLabel": "Account Status",
+  "@accountStatusLabel": {
+    "description": "Label for account status in profile settings"
+  },
+  "signedInStatus": "Signed In",
+  "@signedInStatus": {
+    "description": "Status text for logged in user"
+  },
+  "guestStatus": "Guest Mode",
+  "@guestStatus": {
+    "description": "Status text for guest / unauthenticated user"
+  },
+  "userIdLabel": "User ID",
+  "@userIdLabel": {
+    "description": "Label for user ID in profile settings"
+  },
+  "aboutSectionTitle": "About",
+  "@aboutSectionTitle": {
+    "description": "Title for about section in settings"
+  },
+  "appVersionLabel": "Version 1.0.0",
+  "@appVersionLabel": {
+    "description": "Label displaying application version"
+  },
+  "crashReportingActive": "Crash reporting active",
+  "@crashReportingActive": {
+    "description": "Notice that Firebase Crashlytics is active for automatic crash reporting"
   }
 }

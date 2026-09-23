@@ -121,6 +121,11 @@ class MockAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> setUserId(String? userId) async {
+    loggedEvents.add('user_id:$userId');
+  }
+
+  @override
   Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {
     loggedEvents.add(name);
   }
@@ -153,6 +158,11 @@ void main() {
 
     test('initial state is AnalyzerIdle', () {
       expect(cubit.state, equals(const AnalyzerIdle()));
+    });
+
+    test('init logs feature_opened:image_analyzer to Analytics', () {
+      cubit.init();
+      expect(mockAnalytics.loggedEvents, contains('feature_opened:image_analyzer'));
     });
 
     test('analyzeImage parses tags, logs image_analyzed analytics, and stores Firestore history', () async {
