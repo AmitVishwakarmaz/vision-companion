@@ -331,6 +331,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest User'**
   String get anonymousUser;
+
+  /// Error message when user is not found
+  ///
+  /// In en, this message translates to:
+  /// **'No user found with this email address.'**
+  String get authErrorUserNotFound;
+
+  /// Error message for incorrect password
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password. Please try again.'**
+  String get authErrorWrongPassword;
+
+  /// Error message for invalid email format
+  ///
+  /// In en, this message translates to:
+  /// **'The email address is not valid.'**
+  String get authErrorInvalidEmail;
+
+  /// Error message when user account is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled.'**
+  String get authErrorUserDisabled;
+
+  /// Error message when requests are throttled
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed attempts. Please try again later.'**
+  String get authErrorTooManyRequests;
+
+  /// Error message for network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your internet connection.'**
+  String get authErrorNetworkFailed;
+
+  /// Notice when Google sign-in is cancelled by user
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in was cancelled.'**
+  String get authErrorGoogleCancelled;
+
+  /// Generic authentication failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Please check your credentials.'**
+  String get authErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

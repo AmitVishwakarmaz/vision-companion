@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
+import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 
@@ -14,6 +16,8 @@ Future<void> initDependencies({
   SharedPreferences? sharedPreferences,
   FirebaseAuth? firebaseAuth,
   FirebaseFirestore? firestore,
+  GoogleSignIn? googleSignIn,
+  AuthRepository? authRepository,
 }) async {
   // External: SharedPreferences
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -44,15 +48,25 @@ Future<void> initDependencies({
     sl.registerLazySingleton<FirebaseFirestore>(() => db!);
   }
 
+  // External: GoogleSignIn
+  final google = googleSignIn ?? GoogleSignIn.instance;
+  sl.registerLazySingleton<GoogleSignIn>(() => google);
+
+  // Repositories
+  final repository = authRepository ??
+      FirebaseAuthRepository(
+        firebaseAuth: sl.isRegistered<FirebaseAuth>() ? sl<FirebaseAuth>() : null,
+        googleSignIn: sl<GoogleSignIn>(),
+      );
+  sl.registerLazySingleton<AuthRepository>(() => repository);
+
   // Feature Cubits
-  sl.registerFactory<SettingsCubit>(
+  sl.registerLazySingleton<SettingsCubit>(
     () => SettingsCubit(prefs: sl<SharedPreferences>()),
   );
 
-  sl.registerFactory<AuthCubit>(
-    () => AuthCubit(
-      firebaseAuth: sl.isRegistered<FirebaseAuth>() ? sl<FirebaseAuth>() : null,
-    ),
+  sl.registerLazySingleton<AuthCubit>(
+    () => AuthCubit(authRepository: sl<AuthRepository>()),
   );
 
   sl.registerFactory<DetectorCubit>(() => DetectorCubit());

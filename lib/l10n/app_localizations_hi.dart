@@ -129,4 +129,32 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get anonymousUser => 'अतिथि उपयोगकर्ता';
+
+  @override
+  String get authErrorUserNotFound =>
+      'इस ईमेल पते से कोई उपयोगकर्ता नहीं मिला।';
+
+  @override
+  String get authErrorWrongPassword => 'गलत पासवर्ड। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get authErrorInvalidEmail => 'ईमेल पता अमान्य है।';
+
+  @override
+  String get authErrorUserDisabled => 'यह खाता अक्षम कर दिया गया है।';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'बहुत सारे असफल प्रयास। कृपया बाद में पुनः प्रयास करें।';
+
+  @override
+  String get authErrorNetworkFailed =>
+      'नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।';
+
+  @override
+  String get authErrorGoogleCancelled => 'गूगल साइन-इन रद्द कर दिया गया।';
+
+  @override
+  String get authErrorGeneric =>
+      'प्रमाणीकरण विफल रहा। कृपया अपनी जानकारी जांचें।';
 }

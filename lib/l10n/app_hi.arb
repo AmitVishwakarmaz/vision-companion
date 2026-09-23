@@ -38,5 +38,13 @@
   "themeDark": "डार्क",
   "themeSystem": "सिस्टम डिफ़ॉल्ट",
   "profileSection": "उपयोगकर्ता प्रोफ़ाइल",
-  "anonymousUser": "अतिथि उपयोगकर्ता"
+  "anonymousUser": "अतिथि उपयोगकर्ता",
+  "authErrorUserNotFound": "इस ईमेल पते से कोई उपयोगकर्ता नहीं मिला।",
+  "authErrorWrongPassword": "गलत पासवर्ड। कृपया पुनः प्रयास करें।",
+  "authErrorInvalidEmail": "ईमेल पता अमान्य है।",
+  "authErrorUserDisabled": "यह खाता अक्षम कर दिया गया है।",
+  "authErrorTooManyRequests": "बहुत सारे असफल प्रयास। कृपया बाद में पुनः प्रयास करें।",
+  "authErrorNetworkFailed": "नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
+  "authErrorGoogleCancelled": "गूगल साइन-इन रद्द कर दिया गया।",
+  "authErrorGeneric": "प्रमाणीकरण विफल रहा। कृपया अपनी जानकारी जांचें।"
 }

@@ -1,85 +1,78 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  final FirebaseAuth? firebaseAuth;
+  final AuthRepository _authRepository;
+  StreamSubscription<User?>? _authSubscription;
 
-  AuthCubit({this.firebaseAuth})
-      : super(const AuthInitial()) {
-    checkAuthStatus();
+  AuthCubit({required AuthRepository authRepository})
+      : _authRepository = authRepository,
+        super(
+          authRepository.currentUser != null
+              ? Authenticated.fromFirebaseUser(authRepository.currentUser!)
+              : const Unauthenticated(),
+        ) {
+    _initAuthListener();
   }
 
-  void checkAuthStatus() {
-    try {
-      final user = firebaseAuth?.currentUser;
+  void _initAuthListener() {
+    _authSubscription = _authRepository.authStateChanges.listen((user) {
       if (user != null) {
-        emit(Authenticated(
-          userId: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-        ));
+        emit(Authenticated.fromFirebaseUser(user));
       } else {
         emit(const Unauthenticated());
       }
-    } catch (e) {
-      emit(const Unauthenticated());
-    }
+    });
   }
 
   Future<void> signInWithEmail(String email, String password) async {
-    emit(const AuthLoading());
+    emit(const Loading());
     try {
-      final auth = firebaseAuth;
-      if (auth != null) {
-        final credential = await auth.signInWithEmailAndPassword(
-          email: email.trim(),
-          password: password.trim(),
-        );
-        final user = credential.user;
-        if (user != null) {
-          emit(Authenticated(
-            userId: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-          ));
-          return;
-        }
+      final credential = await _authRepository.signInWithEmail(email, password);
+      final user = credential?.user;
+      if (user != null) {
+        emit(Authenticated.fromFirebaseUser(user));
       }
-      // Demo/Fallback authentication for testing or offline environment
-      emit(Authenticated(
-        userId: 'demo-user-123',
-        email: email.trim(),
-        displayName: email.split('@').first,
-      ));
-    } on FirebaseAuthException catch (e) {
-      emit(AuthError(e.message ?? 'Authentication failed'));
+    } on AuthFailure catch (failure) {
+      emit(AuthError(failure));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(AuthFailure.generic(e.toString())));
     }
   }
 
   Future<void> signInWithGoogle() async {
-    emit(const AuthLoading());
+    emit(const Loading());
     try {
-      // In initial project skeleton, emit demo user or handle provider
-      emit(const Authenticated(
-        userId: 'google-user-id',
-        email: 'user@example.com',
-        displayName: 'Vision User',
-      ));
+      final credential = await _authRepository.signInWithGoogle();
+      final user = credential?.user;
+      if (user != null) {
+        emit(Authenticated.fromFirebaseUser(user));
+      }
+    } on AuthFailure catch (failure) {
+      emit(AuthError(failure));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(AuthFailure.generic(e.toString())));
     }
   }
 
   Future<void> signOut() async {
-    emit(const AuthLoading());
+    emit(const Loading());
     try {
-      await firebaseAuth?.signOut();
+      await _authRepository.signOut();
       emit(const Unauthenticated());
+    } on AuthFailure catch (failure) {
+      emit(AuthError(failure));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(AuthFailure.generic(e.toString())));
     }
+  }
+
+  @override
+  Future<void> close() async {
+    await _authSubscription?.cancel();
+    return super.close();
   }
 }

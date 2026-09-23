@@ -54,14 +54,14 @@ class _LoginPageState extends State<LoginPage> {
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.getLocalizedMessage(l10n)),
                 backgroundColor: theme.colorScheme.error,
               ),
             );
           }
         },
         builder: (context, state) {
-          final isLoading = state is AuthLoading;
+          final isLoading = state is Loading;
 
           return SafeArea(
             child: Center(

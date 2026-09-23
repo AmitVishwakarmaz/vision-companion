@@ -52,11 +52,11 @@ class VisionCompanionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SettingsCubit>(
-          create: (_) => sl<SettingsCubit>(),
+        BlocProvider<SettingsCubit>.value(
+          value: sl<SettingsCubit>(),
         ),
-        BlocProvider<AuthCubit>(
-          create: (_) => sl<AuthCubit>(),
+        BlocProvider<AuthCubit>.value(
+          value: sl<AuthCubit>(),
         ),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(

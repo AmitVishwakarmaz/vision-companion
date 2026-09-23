@@ -130,4 +130,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get anonymousUser => 'Guest User';
+
+  @override
+  String get authErrorUserNotFound => 'No user found with this email address.';
+
+  @override
+  String get authErrorWrongPassword => 'Incorrect password. Please try again.';
+
+  @override
+  String get authErrorInvalidEmail => 'The email address is not valid.';
+
+  @override
+  String get authErrorUserDisabled => 'This account has been disabled.';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'Too many failed attempts. Please try again later.';
+
+  @override
+  String get authErrorNetworkFailed =>
+      'Network error. Please check your internet connection.';
+
+  @override
+  String get authErrorGoogleCancelled => 'Google sign-in was cancelled.';
+
+  @override
+  String get authErrorGeneric =>
+      'Authentication failed. Please check your credentials.';
 }
