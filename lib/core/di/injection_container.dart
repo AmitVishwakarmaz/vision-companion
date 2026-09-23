@@ -9,6 +9,7 @@ import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
+import 'package:vision_companion/features/detector/services/detector_service.dart';
 import 'package:vision_companion/features/history/repositories/history_repository.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
 
@@ -21,6 +22,7 @@ Future<void> initDependencies({
   GoogleSignIn? googleSignIn,
   AuthRepository? authRepository,
   HistoryRepository? historyRepository,
+  DetectorService? detectorService,
 }) async {
   // External: SharedPreferences
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -77,6 +79,10 @@ Future<void> initDependencies({
       );
   sl.registerLazySingleton<HistoryRepository>(() => history);
 
+  // Detector Service
+  final detector = detectorService ?? LiveDetectorService();
+  sl.registerLazySingleton<DetectorService>(() => detector);
+
   // Feature Cubits
   sl.registerLazySingleton<SettingsCubit>(
     () => SettingsCubit(prefs: sl<SharedPreferences>()),
@@ -87,7 +93,10 @@ Future<void> initDependencies({
   );
 
   sl.registerFactory<DetectorCubit>(
-    () => DetectorCubit(historyRepository: sl<HistoryRepository>()),
+    () => DetectorCubit(
+      detectorService: sl<DetectorService>(),
+      historyRepository: sl<HistoryRepository>(),
+    ),
   );
 
   sl.registerFactory<AnalyzerCubit>(
