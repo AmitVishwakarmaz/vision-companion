@@ -57,7 +57,7 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
 
     try {
       // 2. Perform AI Vision inference
-      final String description = await visionService.analyzeImage(
+      final String rawDescription = await visionService.analyzeImage(
         imagePath: imagePath,
         apiKey: apiKey,
         prompt: prompt,
@@ -67,38 +67,52 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
 
       stopwatch.stop();
 
+      final parsed = AnalysisData.parseWithTags(rawDescription);
+
       final isGroq = visionService is GroqVisionService;
       final defaultModelName = isGroq
           ? GroqVisionService.defaultModel
           : GeminiVisionService.defaultModel;
 
       final analysisData = AnalysisData(
-        description: description,
+        description: parsed.cleanDescription,
         imagePath: imagePath,
         model: model ?? defaultModelName,
         latencyMs: stopwatch.elapsedMilliseconds,
         timestamp: DateTime.now(),
+        tags: parsed.tags,
       );
 
       // 3. Save text result to Firestore history (WITHOUT uploading image to Firebase Storage)
+      // Path: users/{uid}/history/{docId} (with timestamp, featureType, resultSummary)
       try {
         await historyRepository?.logAnalysis(
-          resultSummary: description,
+          resultSummary: analysisData.description,
           metadata: {
             'source': isGroq ? 'groq_vision' : 'gemini_vision',
             'model': model ?? defaultModelName,
             'latencyMs': stopwatch.elapsedMilliseconds,
+            'tags': analysisData.tags.map((t) => t.toMap()).toList(),
             'imagePath': File(imagePath).uri.pathSegments.isNotEmpty
                 ? File(imagePath).uri.pathSegments.last
                 : 'captured_photo.jpg',
           },
+          timestamp: analysisData.timestamp,
         );
       } catch (err) {
         debugPrint('Notice: History log failed (non-critical): $err');
       }
 
-      // 4. Log completion to analytics
-      analyticsService?.logFeatureOpened('ai_image_analyzer');
+      // 4. Log completion to analytics (event: image_analyzed)
+      analyticsService?.logImageAnalyzed(
+        model: analysisData.model,
+        latencyMs: analysisData.latencyMs,
+        tagsCount: analysisData.tags.length,
+      );
+      analyticsService?.logCustomEvent('image_analyzed', parameters: {
+        'model': analysisData.model,
+        'latency_ms': analysisData.latencyMs,
+      });
 
       emit(AnalyzerResult(analysisData));
     } on GeminiAuthException catch (e) {

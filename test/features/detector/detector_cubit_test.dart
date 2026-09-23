@@ -120,6 +120,13 @@ class MockAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logImageAnalyzed({
+    String? model,
+    int? latencyMs,
+    int? tagsCount,
+  }) async {}
+
+  @override
   Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {}
 }
 

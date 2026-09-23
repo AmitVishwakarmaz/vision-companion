@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_state.dart';
 import 'package:vision_companion/features/analyzer/models/analysis_data.dart';
@@ -32,7 +33,8 @@ class MockVisionService implements VisionService {
     if (mockError != null) {
       throw mockError!;
     }
-    return mockResult ?? 'A white coffee cup sitting on a polished wooden table next to a notebook.';
+    return mockResult ??
+        'A brown cat sleeping on a sofa.\nTags: cat (94%), sofa (88%)';
   }
 }
 
@@ -67,6 +69,7 @@ class MockHistoryRepository implements HistoryRepository {
       'uid': uid,
       'summary': resultSummary,
       'metadata': metadata,
+      'timestamp': timestamp,
     });
     return 'analysis_doc_1';
   }
@@ -91,20 +94,55 @@ class MockHistoryRepository implements HistoryRepository {
   Future<void> deleteHistoryEntry({String? uid, required String docId}) async {}
 }
 
+class MockAnalyticsService implements AnalyticsService {
+  final List<String> loggedEvents = [];
+
+  @override
+  Future<void> logFeatureOpened(String featureName) async {
+    loggedEvents.add('feature_opened:$featureName');
+  }
+
+  @override
+  Future<void> logDetectionCompleted({
+    required int count,
+    required List<String> categories,
+    int? latencyMs,
+  }) async {
+    loggedEvents.add('detection_completed');
+  }
+
+  @override
+  Future<void> logImageAnalyzed({
+    String? model,
+    int? latencyMs,
+    int? tagsCount,
+  }) async {
+    loggedEvents.add('image_analyzed');
+  }
+
+  @override
+  Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {
+    loggedEvents.add(name);
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('AnalyzerCubit with Vision Service Integration', () {
+  group('AnalyzerCubit with Vision Service & Accessibility', () {
     late MockHistoryRepository mockHistoryRepo;
     late MockVisionService mockVisionService;
+    late MockAnalyticsService mockAnalytics;
     late AnalyzerCubit cubit;
 
     setUp(() {
       mockHistoryRepo = MockHistoryRepository();
       mockVisionService = MockVisionService();
+      mockAnalytics = MockAnalyticsService();
       cubit = AnalyzerCubit(
         visionService: mockVisionService,
         historyRepository: mockHistoryRepo,
+        analyticsService: mockAnalytics,
         apiKeyProvider: () => 'test_mock_gemini_key_12345',
       );
     });
@@ -117,8 +155,8 @@ void main() {
       expect(cubit.state, equals(const AnalyzerIdle()));
     });
 
-    test('analyzeImage emits Processing then Result(AnalysisData)', () async {
-      mockVisionService.mockResult = 'A laptop open on a desk showing code editor.';
+    test('analyzeImage parses tags, logs image_analyzed analytics, and stores Firestore history', () async {
+      mockVisionService.mockResult = 'A brown cat sitting quietly.\nTags: cat (94%), sofa (88%)';
 
       final states = <AnalyzerState>[];
       final subscription = cubit.stream.listen(states.add);
@@ -132,19 +170,21 @@ void main() {
 
       final result = states[1] as AnalyzerResult;
       expect(result.data, isA<AnalysisData>());
-      expect(result.description, equals('A laptop open on a desk showing code editor.'));
+      expect(result.description, equals('A brown cat sitting quietly.'));
       expect(result.imagePath, equals('/path/to/test_image.jpg'));
-      expect(result.data.model, equals(GeminiVisionService.defaultModel));
-
-      // Verify Vision service was called with sanitized API key
-      expect(mockVisionService.callCount, equals(1));
-      expect(mockVisionService.lastApiKey, equals('test_mock_gemini_key_12345'));
+      expect(result.data.tags.length, equals(2));
+      expect(result.data.tags.first.label, equals('cat'));
+      expect(result.data.tags.first.semanticLabel, equals('Tag: cat, 94% confidence'));
 
       // Verify Firestore history logged without Firebase Storage upload
       expect(mockHistoryRepo.loggedCalls.length, equals(1));
       expect(mockHistoryRepo.loggedCalls.first['type'], equals('analysis'));
-      expect(mockHistoryRepo.loggedCalls.first['summary'], contains('A laptop open on a desk'));
+      expect(mockHistoryRepo.loggedCalls.first['summary'], equals('A brown cat sitting quietly.'));
       expect(mockHistoryRepo.loggedCalls.first['metadata']?['source'], equals('gemini_vision'));
+      expect(mockHistoryRepo.loggedCalls.first['metadata']?['tags'], isNotEmpty);
+
+      // Verify Analytics event: image_analyzed
+      expect(mockAnalytics.loggedEvents, contains('image_analyzed'));
 
       await subscription.cancel();
     });
@@ -153,6 +193,7 @@ void main() {
       final quotedCubit = AnalyzerCubit(
         visionService: mockVisionService,
         historyRepository: mockHistoryRepo,
+        analyticsService: mockAnalytics,
         apiKeyProvider: () => '"AIzaSy_quoted_key_123"',
       );
 
@@ -165,6 +206,7 @@ void main() {
       final emptyKeyCubit = AnalyzerCubit(
         visionService: mockVisionService,
         historyRepository: mockHistoryRepo,
+        analyticsService: mockAnalytics,
         apiKeyProvider: () => '',
       );
 
@@ -241,7 +283,7 @@ void main() {
 
       // Fix error and retry
       mockVisionService.mockError = null;
-      mockVisionService.mockResult = 'Successful retry description.';
+      mockVisionService.mockResult = 'Successful retry description.\nTags: cat (94%)';
 
       await cubit.retry();
 

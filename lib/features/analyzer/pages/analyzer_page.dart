@@ -93,9 +93,14 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
   }
 
   Future<void> _captureAndAnalyze() async {
+    if (context.read<AnalyzerCubit>().state is AnalyzerProcessing) return;
     HapticFeedback.selectionClick().catchError((_) {});
     final cubit = context.read<AnalyzerCubit>();
     final langCode = Localizations.localeOf(context).languageCode;
+
+    // After capture announce: "Analyzing image, please wait"
+    // ignore: deprecated_member_use
+    SemanticsService.announce('Analyzing image, please wait', Directionality.of(context));
 
     if (_cameraController != null && _cameraController!.value.isInitialized) {
       try {
@@ -137,7 +142,11 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
       ),
       body: BlocConsumer<AnalyzerCubit, AnalyzerState>(
         listener: (context, state) {
-          if (state is AnalyzerError) {
+          if (state is AnalyzerProcessing) {
+            // TalkBack announcement when processing begins
+            // ignore: deprecated_member_use
+            SemanticsService.announce('processing', Directionality.of(context));
+          } else if (state is AnalyzerError) {
             HapticFeedback.heavyImpact().catchError((_) {});
             // TalkBack announcement for screen readers
             // ignore: deprecated_member_use
@@ -147,8 +156,11 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
             _showErrorPopup(context, state.message, state.failedImagePath, langCode, l10n);
           } else if (state is AnalyzerResult) {
             HapticFeedback.lightImpact().catchError((_) {});
+            final tagsText = state.data.tags.isNotEmpty
+                ? ' ${state.data.tags.map((t) => t.semanticLabel).join('. ')}.'
+                : '';
             // ignore: deprecated_member_use
-            SemanticsService.announce(state.description, Directionality.of(context));
+            SemanticsService.announce('${state.description}$tagsText', Directionality.of(context));
           }
         },
         builder: (context, state) {
@@ -178,17 +190,13 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                           if (!isResult && !isError && _isCameraInitialized && _cameraController != null)
                             Semantics(
                               label: l10n.analyzerCameraFeedSemantic,
-                              container: true,
-                              child: Center(
-                                child: CameraPreview(_cameraController!),
-                              ),
+                              child: CameraPreview(_cameraController!),
                             ),
 
-                          // 2. Camera Placeholder (when camera not available)
+                          // 2. Uninitialized / Error Camera Placeholder
                           if (!isResult && !isError && (!_isCameraInitialized || _cameraController == null))
-                            Semantics(
-                              label: _cameraErrorMessage ?? l10n.analyzerPlaceholderMessage,
-                              container: true,
+                            Container(
+                              color: Colors.black87,
                               child: Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(24.0),
@@ -197,16 +205,17 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                     children: [
                                       const Icon(
                                         Icons.camera_alt_outlined,
-                                        size: 64,
-                                        color: Colors.white54,
+                                        size: 48,
+                                        color: Colors.white70,
                                       ),
-                                      const SizedBox(height: 16),
+                                      const SizedBox(height: 12),
                                       Text(
-                                        _cameraErrorMessage ?? l10n.analyzerPlaceholderMessage,
+                                        _cameraErrorMessage ?? l10n.analyzerCameraFeedSemantic,
                                         textAlign: TextAlign.center,
                                         style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 14,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
@@ -218,8 +227,9 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                           // 3. Spinning Progress Indicator while Processing
                           if (isProcessing)
                             Semantics(
+                              container: true,
                               liveRegion: true,
-                              label: l10n.analyzingProgress,
+                              label: 'processing',
                               child: Container(
                                 color: Colors.black.withAlpha(200),
                                 child: Center(
@@ -305,6 +315,41 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                         ),
                                     ],
                                   ),
+
+                                  // Result Chips (Tags with confidence, e.g. "Tag: cat, 94% confidence")
+                                  if (state.data.tags.isNotEmpty) ...[
+                                    const SizedBox(height: 10),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 6,
+                                      children: state.data.tags.map((tag) {
+                                        return Semantics(
+                                          label: tag.semanticLabel,
+                                          child: Chip(
+                                            backgroundColor: Colors.grey.shade100,
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                              side: const BorderSide(color: Colors.black12),
+                                            ),
+                                            avatar: const Icon(
+                                              Icons.label_outline_rounded,
+                                              size: 16,
+                                              color: Colors.black87,
+                                            ),
+                                            label: Text(
+                                              '${tag.label} • ${tag.formattedConfidence}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
                                   const Divider(height: 20, thickness: 1),
 
                                   // Scrollable AI Description

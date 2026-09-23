@@ -53,8 +53,8 @@ class MockSettingsCubit extends Cubit<SettingsState> implements SettingsCubit {
 }
 
 Widget buildTestableAnalyzerPage({
-  required MockAnalyzerCubit analyzerCubit,
-  required MockSettingsCubit settingsCubit,
+  required AnalyzerCubit analyzerCubit,
+  required SettingsCubit settingsCubit,
   Locale locale = const Locale('en'),
 }) {
   return MultiBlocProvider(
@@ -64,12 +64,15 @@ Widget buildTestableAnalyzerPage({
     ],
     child: MaterialApp(
       locale: locale,
-      supportedLocales: const [Locale('en'), Locale('hi')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
       ],
       home: const AnalyzerPage(),
     ),
@@ -90,21 +93,21 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Verify title
+      // Title must be displayed
       expect(find.text('AI Scene Analyzer'), findsOneWidget);
 
-      // Verify placeholder
-      expect(find.text('Capture or choose an image to analyze'), findsOneWidget);
+      // Camera placeholder displayed when hardware camera uninitialized in test
+      expect(find.byIcon(Icons.camera_alt_outlined), findsOneWidget);
 
-      // Verify Capture button is enabled
+      // Capture button must be enabled in Idle state
       final captureBtnFinder = find.byType(ElevatedButton);
       expect(captureBtnFinder, findsOneWidget);
       final ElevatedButton captureBtn = tester.widget(captureBtnFinder);
       expect(captureBtn.onPressed, isNotNull);
     });
 
-    testWidgets('Shows spinning progress indicator and disables capture button during Processing', (tester) async {
-      final analyzerCubit = MockAnalyzerCubit(const AnalyzerProcessing(imagePath: 'sample.jpg'));
+    testWidgets('Shows spinning progress indicator, announces processing, and disables capture button during Processing', (tester) async {
+      final analyzerCubit = MockAnalyzerCubit(const AnalyzerProcessing(imagePath: 'test_image.jpg'));
       final settingsCubit = MockSettingsCubit(const SettingsState(locale: Locale('en'), themeMode: ThemeMode.light));
 
       await tester.pumpWidget(buildTestableAnalyzerPage(
@@ -117,20 +120,30 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Analyzing image with AI...'), findsOneWidget);
 
-      // Capture button must be disabled
+      // Semantics label 'processing' must be present for TalkBack
+      expect(
+        find.byWidgetPredicate((w) => w is Semantics && w.properties.label == 'processing'),
+        findsOneWidget,
+      );
+
+      // Capture button must be disabled while processing
       final captureBtnFinder = find.byType(ElevatedButton);
       expect(captureBtnFinder, findsOneWidget);
       final ElevatedButton captureBtn = tester.widget(captureBtnFinder);
       expect(captureBtn.onPressed, isNull);
     });
 
-    testWidgets('Displays AI description and Take Another Photo button in Result state', (tester) async {
+    testWidgets('Displays AI description, Result chips with TalkBack semantics, and Take Another Photo button in Result state', (tester) async {
       final analysisData = AnalysisData(
-        description: 'A brown dog playing with a red ball in a sunny park.',
-        imagePath: 'dog.jpg',
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        description: 'A brown cat sitting quietly on a couch.',
+        imagePath: 'cat.jpg',
+        model: 'gemini-1.5-flash',
         latencyMs: 142,
         timestamp: DateTime.now(),
+        tags: const [
+          AnalysisTag(label: 'cat', confidence: 0.94),
+          AnalysisTag(label: 'furniture', confidence: 0.90),
+        ],
       );
 
       final analyzerCubit = MockAnalyzerCubit(AnalyzerResult(analysisData));
@@ -143,9 +156,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Description is displayed
-      expect(find.text('A brown dog playing with a red ball in a sunny park.'), findsOneWidget);
+      expect(find.text('A brown cat sitting quietly on a couch.'), findsOneWidget);
       expect(find.text('Scene Description'), findsOneWidget);
       expect(find.text('142ms'), findsOneWidget);
+
+      // Result chips with confidence semantics: e.g. "Tag: cat, 94% confidence"
+      expect(find.bySemanticsLabel('Tag: cat, 94% confidence'), findsOneWidget);
+      expect(find.text('cat • 94%'), findsOneWidget);
+      expect(find.bySemanticsLabel('Tag: furniture, 90% confidence'), findsOneWidget);
 
       // Take Another Photo button is displayed
       expect(find.text('Take Another Photo'), findsOneWidget);
@@ -158,7 +176,7 @@ void main() {
     testWidgets('Displays friendly error and Retry button in Error state, and retry invokes cubit', (tester) async {
       final analyzerCubit = MockAnalyzerCubit(
         const AnalyzerError(
-          'Network error: Unable to connect to Groq AI service. Please check your internet connection.',
+          'Unable to analyze image. Please check your internet connection and try again.',
           failedImagePath: 'failed_image.jpg',
         ),
       );
@@ -172,7 +190,7 @@ void main() {
 
       // Error message displayed
       expect(
-        find.text('Network error: Unable to connect to Groq AI service. Please check your internet connection.'),
+        find.text('Unable to analyze image. Please check your internet connection and try again.'),
         findsOneWidget,
       );
 

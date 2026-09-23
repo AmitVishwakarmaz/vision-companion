@@ -8,6 +8,11 @@ abstract class AnalyticsService {
     required List<String> categories,
     int? latencyMs,
   });
+  Future<void> logImageAnalyzed({
+    String? model,
+    int? latencyMs,
+    int? tagsCount,
+  });
   Future<void> logCustomEvent(String name, {Map<String, Object>? parameters});
 }
 
@@ -54,6 +59,26 @@ class FirebaseAnalyticsService implements AnalyticsService {
       );
     } catch (e) {
       debugPrint('Analytics notice (detection_completed): $e');
+    }
+  }
+
+  @override
+  Future<void> logImageAnalyzed({
+    String? model,
+    int? latencyMs,
+    int? tagsCount,
+  }) async {
+    try {
+      await _instance?.logEvent(
+        name: 'image_analyzed',
+        parameters: {
+          'model': ?model,
+          'latency_ms': ?latencyMs,
+          'tags_count': ?tagsCount,
+        },
+      );
+    } catch (e) {
+      debugPrint('Analytics notice (image_analyzed): $e');
     }
   }
 
