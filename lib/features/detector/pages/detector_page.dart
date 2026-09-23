@@ -26,7 +26,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Initialize model and camera
+    // Initialize model in cubit
     context.read<DetectorCubit>().initialize();
     _initializeCamera();
   }
@@ -68,8 +68,8 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
         _isCameraInitialized = true;
       });
 
-      // Start detection automatically when camera is ready
-      _startStreaming();
+      // Start stream once camera hardware is initialized
+      _startCameraStream();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -79,7 +79,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
     }
   }
 
-  void _startStreaming() {
+  void _startCameraStream() {
     if (_cameraController == null || !_cameraController!.value.isInitialized || _isCameraStreaming) {
       return;
     }
@@ -99,14 +99,13 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
     }
   }
 
-  void _stopStreaming() {
+  void _stopCameraStream() {
     if (_cameraController != null && _isCameraStreaming) {
       try {
         _cameraController!.stopImageStream();
       } catch (_) {}
       _isCameraStreaming = false;
     }
-    context.read<DetectorCubit>().stopDetection();
   }
 
   @override
@@ -117,7 +116,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
     }
 
     if (state == AppLifecycleState.inactive) {
-      _stopStreaming();
+      _stopCameraStream();
       controller.dispose();
       _cameraController = null;
       _isCameraInitialized = false;
@@ -129,11 +128,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_isCameraStreaming && _cameraController != null) {
-      try {
-        _cameraController!.stopImageStream();
-      } catch (_) {}
-    }
+    _stopCameraStream();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -168,7 +163,12 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
         },
         builder: (context, state) {
           final isRunning = state is DetectorRunning || state is DetectorResults;
-          final List<Detection> detections = state is DetectorResults ? state.detections : const [];
+          final isPaused = state is DetectorPaused;
+          final isIdle = state is DetectorInitial;
+
+          final List<Detection> detections = state is DetectorResults
+              ? state.detections
+              : (state is DetectorPaused ? state.lastDetections : const []);
           final int inferenceTimeMs = state is DetectorResults ? state.inferenceTimeMs : 0;
 
           return Padding(
@@ -195,7 +195,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                               child: CameraPreview(_cameraController!),
                             ),
 
-                            // 2. Real-time Bounding Box Overlay
+                            // 2. Real-time Color-Coded Bounding Box Overlay
                             CustomPaint(
                               painter: BoundingBoxPainter(
                                 detections: detections,
@@ -230,45 +230,49 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                             ),
                           ],
 
-                          // HUD Status Badge (Inference Time & Detections Count)
-                          if (isRunning) ...[
-                            Positioned(
-                              top: 16,
-                              left: 16,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withAlpha(200),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white, width: 1.5),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.greenAccent,
-                                        shape: BoxShape.circle,
-                                      ),
+                          // HUD Status Badge (Driven by DetectorState)
+                          Positioned(
+                            top: 16,
+                            left: 16,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(210),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: isRunning
+                                          ? Colors.greenAccent
+                                          : (isPaused ? Colors.amberAccent : Colors.white54),
+                                      shape: BoxShape.circle,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      inferenceTimeMs > 0
-                                          ? '${detections.length} objects | ${inferenceTimeMs}ms'
-                                          : '${detections.length} objects detected',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    isRunning
+                                        ? (inferenceTimeMs > 0
+                                            ? '${detections.length} objects | ${inferenceTimeMs}ms'
+                                            : '${detections.length} objects detected')
+                                        : (isPaused
+                                            ? 'Detection Paused (${detections.length} saved)'
+                                            : (isIdle ? 'Ready to Detect' : 'Error')),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
@@ -276,16 +280,20 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                 ),
                 const SizedBox(height: 20),
 
-                // Controls: Start / Pause Detection (Min 48x48 dp touch target)
+                // State-Driven Controls: Pause / Resume Button
                 ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 48),
                   child: ElevatedButton.icon(
                     icon: Icon(
-                      isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      isRunning
+                          ? Icons.pause_rounded
+                          : (isPaused ? Icons.play_arrow_rounded : Icons.videocam_rounded),
                       color: isRunning ? Colors.black : Colors.white,
                     ),
                     label: Text(
-                      isRunning ? l10n.stopDetection : l10n.startDetection,
+                      isRunning
+                          ? 'Pause Detection'
+                          : (isPaused ? 'Resume Detection' : l10n.startDetection),
                       style: TextStyle(
                         color: isRunning ? Colors.black : Colors.white,
                         fontWeight: FontWeight.bold,
@@ -302,10 +310,13 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                       minimumSize: const Size.fromHeight(52),
                     ),
                     onPressed: () {
+                      final cubit = context.read<DetectorCubit>();
                       if (isRunning) {
-                        _stopStreaming();
+                        cubit.pauseDetection();
+                      } else if (isPaused) {
+                        cubit.resumeDetection();
                       } else {
-                        _startStreaming();
+                        cubit.startDetection();
                       }
                     },
                   ),

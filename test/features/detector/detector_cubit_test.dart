@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
+import 'package:vision_companion/features/detector/constants/coco_labels.dart';
 import 'package:vision_companion/features/detector/cubit/detector_cubit.dart';
 import 'package:vision_companion/features/detector/cubit/detector_state.dart';
 import 'package:vision_companion/features/detector/models/detection.dart';
@@ -95,18 +97,49 @@ class FakeDetectorService implements DetectorService {
   }
 }
 
+class MockAnalyticsService implements AnalyticsService {
+  final List<String> openedFeatures = [];
+  final List<Map<String, dynamic>> completedDetections = [];
+
+  @override
+  Future<void> logFeatureOpened(String featureName) async {
+    openedFeatures.add(featureName);
+  }
+
+  @override
+  Future<void> logDetectionCompleted({
+    required int count,
+    required List<String> categories,
+    int? latencyMs,
+  }) async {
+    completedDetections.add({
+      'count': count,
+      'categories': categories,
+      'latencyMs': latencyMs,
+    });
+  }
+
+  @override
+  Future<void> logCustomEvent(String name, {Map<String, Object>? parameters}) async {}
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('DetectorCubit', () {
     late MockHistoryRepository mockHistoryRepo;
     late FakeDetectorService fakeDetectorService;
+    late MockAnalyticsService mockAnalyticsService;
     late DetectorCubit cubit;
 
     setUp(() {
       mockHistoryRepo = MockHistoryRepository();
       fakeDetectorService = FakeDetectorService();
+      mockAnalyticsService = MockAnalyticsService();
       cubit = DetectorCubit(
         detectorService: fakeDetectorService,
         historyRepository: mockHistoryRepo,
+        analyticsService: mockAnalyticsService,
       );
     });
 
@@ -119,10 +152,11 @@ void main() {
       expect(cubit.state, isA<DetectorIdle>());
     });
 
-    test('initialize loads detector service successfully', () async {
+    test('initialize loads detector service and logs feature_opened to Analytics', () async {
       await cubit.initialize();
       expect(fakeDetectorService.initialized, isTrue);
       expect(cubit.state, equals(const DetectorInitial()));
+      expect(mockAnalyticsService.openedFeatures, contains('live_object_detector'));
     });
 
     test('initialize emits DetectorError when model loading fails', () async {
@@ -139,13 +173,28 @@ void main() {
       expect(mockHistoryRepo.loggedCalls.first['type'], equals('detection'));
     });
 
+    test('pauseDetection transitions to DetectorPaused and retains last detections', () async {
+      await cubit.startDetection();
+      await cubit.updateDetectedObjects(['person', 'cell phone']);
+      expect(cubit.state, isA<DetectorResults>());
+
+      cubit.pauseDetection();
+      expect(cubit.state, isA<DetectorPaused>());
+      final pausedState = cubit.state as DetectorPaused;
+      expect(pausedState.lastDetections.length, equals(2));
+      expect(pausedState.lastDetections.first.label, equals('person'));
+
+      cubit.resumeDetection();
+      expect(cubit.state, equals(const DetectorRunning(detectedObjects: [])));
+    });
+
     test('stopDetection emits DetectorStopped (Idle)', () async {
       await cubit.startDetection();
       cubit.stopDetection();
       expect(cubit.state, equals(const DetectorStopped()));
     });
 
-    test('updateDetectedObjects updates detectedObjects and emits DetectorResults', () async {
+    test('updateDetectedObjects updates detectedObjects, logs detection_completed, and emits DetectorResults', () async {
       await cubit.startDetection();
       await cubit.updateDetectedObjects(['cup', 'bottle']);
 
@@ -155,6 +204,10 @@ void main() {
       expect(resultsState.detections.length, equals(2));
       expect(resultsState.detections.first.label, equals('cup'));
       expect(resultsState.detections.last.label, equals('bottle'));
+
+      expect(mockAnalyticsService.completedDetections.length, equals(1));
+      expect(mockAnalyticsService.completedDetections.first['count'], equals(2));
+      expect(mockAnalyticsService.completedDetections.first['categories'], equals(['cup', 'bottle']));
     });
 
     test('logDetectionResult delegates to HistoryRepository', () async {
@@ -183,6 +236,19 @@ void main() {
       expect(state.inferenceTimeMs, equals(42));
       expect(state.detectedObjects, equals(['person']));
       expect(state.detections.first.confidencePercentage, equals(95));
+    });
+
+    test('CocoLabels color-codes distinct categories', () {
+      final personColor = CocoLabels.getColorForCategory('person');
+      final carColor = CocoLabels.getColorForCategory('car');
+      final dogColor = CocoLabels.getColorForCategory('dog');
+      final pizzaColor = CocoLabels.getColorForCategory('pizza');
+      final tvColor = CocoLabels.getColorForCategory('tv');
+
+      expect(personColor, isNot(equals(carColor)));
+      expect(carColor, isNot(equals(dogColor)));
+      expect(dogColor, isNot(equals(pizzaColor)));
+      expect(pizzaColor, isNot(equals(tvColor)));
     });
   });
 }

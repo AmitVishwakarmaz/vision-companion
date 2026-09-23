@@ -26,6 +26,16 @@ class DetectorRunning extends DetectorState {
   List<Object?> get props => [detectedObjects];
 }
 
+/// Paused state when the user pauses live stream detection.
+class DetectorPaused extends DetectorState {
+  final List<Detection> lastDetections;
+
+  const DetectorPaused({this.lastDetections = const []});
+
+  @override
+  List<Object?> get props => [lastDetections];
+}
+
 /// Results state carrying detected bounding boxes, confidence, categories, and latency.
 class DetectorResults extends DetectorState {
   final List<Detection> detections;

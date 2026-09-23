@@ -1,6 +1,7 @@
-import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
 import 'package:vision_companion/features/detector/models/detection.dart';
 import 'package:vision_companion/features/detector/services/detector_service.dart';
 import 'package:vision_companion/features/history/repositories/history_repository.dart';
@@ -9,17 +10,22 @@ import 'detector_state.dart';
 class DetectorCubit extends Cubit<DetectorState> {
   final DetectorService? detectorService;
   final HistoryRepository? historyRepository;
+  final AnalyticsService? analyticsService;
+
   bool _isProcessingFrame = false;
   DateTime? _lastHistoryLogTime;
+  DateTime? _lastHapticTime;
 
   DetectorCubit({
     this.detectorService,
     this.historyRepository,
+    this.analyticsService,
   }) : super(const DetectorInitial());
 
-  /// Initializes the detector service and loads the TFLite model on the isolate.
+  /// Initializes the detector service, loads the TFLite model, and logs feature_opened.
   Future<void> initialize() async {
     try {
+      analyticsService?.logFeatureOpened('live_object_detector');
       if (detectorService != null && !detectorService!.isInitialized) {
         await detectorService!.initialize();
       }
@@ -40,6 +46,20 @@ class DetectorCubit extends Cubit<DetectorState> {
         },
       );
     } catch (_) {}
+  }
+
+  /// Pauses live detection.
+  void pauseDetection() {
+    if (state is DetectorResults) {
+      emit(DetectorPaused(lastDetections: (state as DetectorResults).detections));
+    } else {
+      emit(const DetectorPaused());
+    }
+  }
+
+  /// Resumes live detection from paused state.
+  void resumeDetection() {
+    emit(const DetectorRunning(detectedObjects: []));
   }
 
   /// Stops detection and resets state to Idle.
@@ -74,7 +94,19 @@ class DetectorCubit extends Cubit<DetectorState> {
           inferenceTimeMs: result.inferenceTimeMs,
         ));
 
-        // Periodically log to history repository when objects are detected (throttle to max once every 10s)
+        // 1. Trigger haptic feedback when objects are detected
+        if (result.detections.isNotEmpty) {
+          _triggerHapticIfAppropriate();
+        }
+
+        // 2. Log detection_completed to Analytics
+        analyticsService?.logDetectionCompleted(
+          count: result.detections.length,
+          categories: result.detections.map((d) => d.label).toSet().toList(),
+          latencyMs: result.inferenceTimeMs,
+        );
+
+        // 3. Save detection results to Firestore history (throttled to avoid flooding)
         if (result.detections.isNotEmpty && historyRepository != null) {
           final now = DateTime.now();
           if (_lastHistoryLogTime == null || now.difference(_lastHistoryLogTime!).inSeconds >= 10) {
@@ -98,6 +130,16 @@ class DetectorCubit extends Cubit<DetectorState> {
     }
   }
 
+  void _triggerHapticIfAppropriate() {
+    final now = DateTime.now();
+    if (_lastHapticTime == null || now.difference(_lastHapticTime!).inMilliseconds >= 700) {
+      _lastHapticTime = now;
+      try {
+        HapticFeedback.lightImpact().catchError((_) {});
+      } catch (_) {}
+    }
+  }
+
   /// Direct method to update detected objects (retained for backward compatibility).
   Future<void> updateDetectedObjects(List<String> objects) async {
     if (state is DetectorRunning || state is DetectorResults) {
@@ -111,7 +153,14 @@ class DetectorCubit extends Cubit<DetectorState> {
       }).toList();
 
       emit(DetectorResults(detections: mockDetections));
+
       if (objects.isNotEmpty) {
+        _triggerHapticIfAppropriate();
+        analyticsService?.logDetectionCompleted(
+          count: objects.length,
+          categories: objects,
+        );
+
         try {
           await historyRepository?.logDetection(
             resultSummary: 'Detected: ${objects.join(', ')}',

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:vision_companion/features/detector/constants/coco_labels.dart';
 import 'package:vision_companion/features/detector/models/detection.dart';
 
 /// CustomPainter that renders high-contrast bounding boxes, confidence percentages,
-/// and object category labels over the camera preview.
+/// and color-coded boxes by object category over the camera preview.
 class BoundingBoxPainter extends CustomPainter {
   final List<Detection> detections;
   final Size? previewSize;
@@ -16,20 +17,6 @@ class BoundingBoxPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (detections.isEmpty) return;
 
-    final boxPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0;
-
-    final innerBoxPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final labelBgPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-
     for (final detection in detections) {
       final box = detection.boundingBox;
 
@@ -42,11 +29,31 @@ class BoundingBoxPainter extends CustomPainter {
       final rect = Rect.fromLTRB(left, top, right, bottom);
       final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
 
-      // Draw high-contrast double outline (outer black, inner white) for visibility over any background
-      canvas.drawRRect(rrect, boxPaint);
-      canvas.drawRRect(rrect, innerBoxPaint);
+      // Color-code box and label by object category
+      final categoryColor = CocoLabels.getColorForCategory(detection.label);
 
-      // Label text: Object category + confidence percentage, e.g. "Person 92%"
+      // 1. Subtle semi-transparent fill
+      final fillPaint = Paint()
+        ..color = categoryColor.withAlpha(30)
+        ..style = PaintingStyle.fill;
+      canvas.drawRRect(rrect, fillPaint);
+
+      // 2. High-contrast double stroke:
+      // Outer black stroke for contrast over light backgrounds
+      final outerStroke = Paint()
+        ..color = Colors.black
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.0;
+      canvas.drawRRect(rrect, outerStroke);
+
+      // Inner category color stroke
+      final categoryStroke = Paint()
+        ..color = categoryColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+      canvas.drawRRect(rrect, categoryStroke);
+
+      // 3. Label text: Object category + confidence percentage, e.g. "PERSON 92%"
       final textSpan = TextSpan(
         text: ' ${detection.label.toUpperCase()} ${detection.confidencePercentage}% ',
         style: const TextStyle(
@@ -62,7 +69,6 @@ class BoundingBoxPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout();
 
-      // Position label chip above box if space allows, otherwise just inside top of box
       final labelHeight = textPainter.height + 6;
       final labelWidth = textPainter.width + 8;
 
@@ -77,15 +83,19 @@ class BoundingBoxPainter extends CustomPainter {
         const Radius.circular(6),
       );
 
-      // Draw label background badge and border
+      // 4. Draw label badge background and black border
+      final labelBgPaint = Paint()
+        ..color = categoryColor
+        ..style = PaintingStyle.fill;
       canvas.drawRRect(labelRect, labelBgPaint);
+
       final labelBorderPaint = Paint()
-        ..color = Colors.white
+        ..color = Colors.black
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
+        ..strokeWidth = 1.5;
       canvas.drawRRect(labelRect, labelBorderPaint);
 
-      // Draw text
+      // 5. Draw text
       textPainter.paint(canvas, Offset(labelLeft + 4, labelTop + 3));
     }
   }

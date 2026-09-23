@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/services/analytics_service.dart';
 import 'package:vision_companion/features/analyzer/cubit/analyzer_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/repositories/auth_repository.dart';
@@ -23,6 +24,7 @@ Future<void> initDependencies({
   AuthRepository? authRepository,
   HistoryRepository? historyRepository,
   DetectorService? detectorService,
+  AnalyticsService? analyticsService,
 }) async {
   // External: SharedPreferences
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -79,6 +81,10 @@ Future<void> initDependencies({
       );
   sl.registerLazySingleton<HistoryRepository>(() => history);
 
+  // Analytics Service
+  final analytics = analyticsService ?? FirebaseAnalyticsService();
+  sl.registerLazySingleton<AnalyticsService>(() => analytics);
+
   // Detector Service
   final detector = detectorService ?? LiveDetectorService();
   sl.registerLazySingleton<DetectorService>(() => detector);
@@ -96,6 +102,7 @@ Future<void> initDependencies({
     () => DetectorCubit(
       detectorService: sl<DetectorService>(),
       historyRepository: sl<HistoryRepository>(),
+      analyticsService: sl<AnalyticsService>(),
     ),
   );
 
