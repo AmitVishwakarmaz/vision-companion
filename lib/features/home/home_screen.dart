@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/widgets/app_logo.dart';
 import 'package:vision_companion/core/di/injection_container.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
@@ -221,9 +222,19 @@ class HomeScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Semantics(
-              header: true,
-              child: Text(l10n.appTitle),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const AppLogo(
+                  size: 28,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                const SizedBox(width: 10),
+                Semantics(
+                  header: true,
+                  child: Text(l10n.appTitle),
+                ),
+              ],
             ),
             actions: [
               // Settings Button

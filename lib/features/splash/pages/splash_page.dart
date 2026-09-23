@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/widgets/app_logo.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/settings/cubit/settings_cubit.dart';
@@ -46,19 +47,10 @@ class SplashPage extends StatelessWidget {
                     Center(
                       child: Semantics(
                         label: l10n.loginHeaderSemantic,
-                        child: Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.black, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.visibility_rounded,
-                            size: 48,
-                            color: Colors.white,
-                          ),
+                        image: true,
+                        child: const AppLogo(
+                          size: 96,
+                          borderRadius: BorderRadius.all(Radius.circular(24)),
                         ),
                       ),
                     ),

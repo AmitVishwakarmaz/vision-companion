@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/widgets/app_logo.dart';
 import 'package:vision_companion/core/di/injection_container.dart';
 import 'package:vision_companion/core/services/analytics_service.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
@@ -278,18 +279,9 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withAlpha(20),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.shield_outlined,
-                      color: theme.colorScheme.primary,
-                      size: 22,
-                    ),
+                  const AppLogo(
+                    size: 40,
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                   const SizedBox(width: 14),
                   Expanded(

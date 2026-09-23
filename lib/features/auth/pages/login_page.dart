@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
+import 'package:vision_companion/core/widgets/app_logo.dart';
 import 'package:vision_companion/features/auth/cubit/auth_cubit.dart';
 import 'package:vision_companion/features/auth/cubit/auth_state.dart';
 import 'package:vision_companion/features/auth/widgets/auth_button.dart';
@@ -112,19 +113,9 @@ class _LoginPageState extends State<LoginPage> {
                         child: Semantics(
                           label: l10n.loginHeaderSemantic,
                           image: true,
-                          child: Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.black, width: 2),
-                            ),
-                            child: const Icon(
-                              Icons.visibility_rounded,
-                              size: 40,
-                              color: Colors.white,
-                            ),
+                          child: const AppLogo(
+                            size: 72,
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
                           ),
                         ),
                       ),

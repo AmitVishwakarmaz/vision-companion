@@ -4,7 +4,7 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
-        android:label="vision_companion"
+        android:label="Vision Companion"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
