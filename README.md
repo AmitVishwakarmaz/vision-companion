@@ -17,6 +17,12 @@ The project provides two main vision capabilities:
 
 The application is designed to keep interaction simple and accessible while maintaining responsive camera performance.
 
+## APK Download
+
+[Download Vision Companion APK](https://drive.google.com/drive/folders/1J-QGfFBOMZ9idKzmGlCJt0eb1-qnyEGc?usp=sharing)
+
+> The APK is provided as a release build for Android.
+
 ### Vision API
 
 The originally provided Groq API key was non-functional because it had expired or been revoked.
@@ -194,8 +200,9 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /history/{document=**} {
-      allow read, write: if request.auth != null;
+    match /users/{uid}/history/{docId} {
+      allow read, write: if request.auth != null 
+        && request.auth.uid == uid;
     }
   }
 }
