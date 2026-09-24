@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vision_companion/core/constants/app_constants.dart';
@@ -32,103 +33,123 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    // Announce Profile Section so TalkBack speaks "Profile Section" rather than "dialog"
+    // ignore: deprecated_member_use
+    SemanticsService.announce(l10n.profileDialogSemantic, Directionality.of(context));
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      barrierLabel: l10n.profileDialogSemantic,
+      routeSettings: RouteSettings(name: l10n.profileDialogSemantic),
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (bottomSheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Top Drag Handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurface.withAlpha(50),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Header Row with Title & Close Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        l10n.profileMenuTitle,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+        return Semantics(
+          scopesRoute: true,
+          explicitChildNodes: true,
+          label: l10n.profileDialogSemantic,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Top Drag Handle (Excluded from semantics to avoid barrier noise)
+                  ExcludeSemantics(
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurface.withAlpha(50),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
-                    Semantics(
-                      label: l10n.profileMenuClose,
-                      button: true,
-                      child: IconButton(
-                        iconSize: 24,
-                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () => Navigator.of(bottomSheetContext).pop(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Header Row with Title & Accessible Close Button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          l10n.profileMenuTitle,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      Semantics(
+                        button: true,
+                        label: l10n.closeButton,
+                        excludeSemantics: true,
+                        child: IconButton(
+                          iconSize: 24,
+                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                          icon: const Icon(Icons.close_rounded),
+                          tooltip: l10n.closeButton,
+                          onPressed: () => Navigator.of(bottomSheetContext).pop(),
+                        ),
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: 20),
 
-                // Profile Info Card
-                Card(
-                  elevation: 0,
-                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(120),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: theme.colorScheme.primary.withAlpha(40),
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 32,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                displayName,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                // Profile Info Card (Unified semantics so TalkBack speaks name and email cleanly)
+                Semantics(
+                  container: true,
+                  label: '${l10n.profileSection}: $displayName, ${email.isNotEmpty ? email : l10n.emailNotProvided}',
+                  child: Card(
+                    elevation: 0,
+                    color: theme.colorScheme.surfaceContainerHighest.withAlpha(120),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ExcludeSemantics(
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: theme.colorScheme.primary.withAlpha(40),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 32,
+                                color: theme.colorScheme.primary,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                email.isNotEmpty ? email : l10n.emailNotProvided,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface.withAlpha(180),
-                                ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    email.isNotEmpty ? email : l10n.emailNotProvided,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface.withAlpha(180),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -194,9 +215,10 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   @override

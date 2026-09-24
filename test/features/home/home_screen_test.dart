@@ -175,6 +175,38 @@ void main() {
     expect(fakeRepo.signedOutCalled, isTrue);
   });
 
+  testWidgets('Profile bottom sheet close button is accessible and dismisses sheet when tapped',
+      (WidgetTester tester) async {
+    await authCubit.signInWithEmail('alex@example.com', 'password');
+
+    await tester.pumpWidget(buildTestWidget(cubit: authCubit));
+    await tester.pumpAndSettle();
+
+    // Tap profile avatar to open bottom sheet
+    final avatarButton = find.bySemanticsLabel('Profile: alex, tap to open menu');
+    await tester.tap(avatarButton);
+    await tester.pumpAndSettle();
+
+    // Verify Close button exists with 'Close' semantics label and button: true
+    final closeButtonFinder = find.byWidgetPredicate((w) =>
+        w is Semantics &&
+        w.properties.button == true &&
+        w.properties.label == 'Close');
+    expect(closeButtonFinder, findsOneWidget);
+
+    // Verify close button size meets minimum touch target (>= 48x48)
+    final closeButtonSize = tester.getSize(closeButtonFinder);
+    expect(closeButtonSize.height, greaterThanOrEqualTo(48.0));
+    expect(closeButtonSize.width, greaterThanOrEqualTo(48.0));
+
+    // Tap Close button
+    await tester.tap(closeButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Verify bottom sheet is dismissed
+    expect(find.text('Account Profile'), findsNothing);
+  });
+
   testWidgets('Feature cards and buttons have minimum 48x48 tap targets',
       (WidgetTester tester) async {
     await tester.pumpWidget(buildTestWidget(cubit: authCubit));

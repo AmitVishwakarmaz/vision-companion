@@ -29,6 +29,8 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
   CameraDescription? _cameraDescription;
 
   DateTime? _lastAnnouncementTime;
+  String? _lastAnnouncedLabel;
+  final FocusNode _feedFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -37,6 +39,12 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
     // Initialize model in cubit
     context.read<DetectorCubit>().initialize();
     _initializeCamera();
+    // Focus live camera feed on load for clean screen reader flow
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _feedFocusNode.requestFocus();
+      }
+    });
   }
 
   Future<void> _initializeCamera() async {
@@ -71,12 +79,16 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
         return;
       }
 
-      setState(() {
-        _cameraController = controller;
-        _isCameraInitialized = true;
-        _isCameraNotFound = false;
-        _cameraRawError = null;
-      });
+      final oldController = _cameraController;
+      if (mounted) {
+        setState(() {
+          _cameraController = controller;
+          _isCameraInitialized = true;
+          _isCameraNotFound = false;
+          _cameraRawError = null;
+        });
+      }
+      oldController?.dispose();
 
       // Start stream once camera hardware is initialized
       _startCameraStream();
@@ -99,7 +111,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
 
     try {
       _cameraController!.startImageStream((CameraImage image) {
-        if (!mounted) return;
+        if (!mounted || !_isCameraStreaming) return;
         final orientation = _cameraDescription?.sensorOrientation ?? 90;
         cubit.processCameraImage(image, sensorOrientation: orientation);
       });
@@ -111,15 +123,16 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
 
   void _stopCameraStream() {
     if (_cameraController != null && _isCameraStreaming) {
+      _isCameraStreaming = false;
       try {
         _cameraController!.stopImageStream();
       } catch (_) {}
-      _isCameraStreaming = false;
     }
   }
 
-  /// Announces the top detected object using SemanticsService.announce.
-  /// Throttled to at most once every 2 seconds.
+  /// Announces the detected objects using SemanticsService.announce.
+  /// Throttled to at most once every 2 seconds, and suppresses repetitive
+  /// announcements of the same object to prevent TalkBack chaos.
   void _announceTopDetection(BuildContext context, List<Detection> detections) {
     if (detections.isEmpty || !mounted) return;
 
@@ -129,12 +142,19 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
       return;
     }
 
-    // Determine the top detected object with highest confidence
     final topDetection = detections.reduce(
       (max, d) => d.confidence >= max.confidence ? d : max,
     );
 
+    // Prevent spamming TalkBack with the exact same object continuously
+    if (_lastAnnouncedLabel == topDetection.label &&
+        _lastAnnouncementTime != null &&
+        now.difference(_lastAnnouncementTime!).inSeconds < 10) {
+      return;
+    }
+
     _lastAnnouncementTime = now;
+    _lastAnnouncedLabel = topDetection.label;
 
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
@@ -147,26 +167,71 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
     SemanticsService.announce(announcement, Directionality.of(context));
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? controller = _cameraController;
-    if (controller == null || !controller.value.isInitialized) {
-      return;
+  /// Immediate, single announcement when the user taps/clicks the live camera feed
+  void _announceOnFeedTap(
+    BuildContext context,
+    List<Detection> detections,
+    bool isRunning,
+    bool isPaused,
+  ) {
+    HapticFeedback.selectionClick().catchError((_) {});
+    _feedFocusNode.requestFocus();
+
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+    final langCode = Localizations.localeOf(context).languageCode;
+
+    final String announcement;
+    if (isPaused) {
+      announcement = l10n.detectorPausedWithCount(detections.length);
+    } else if (!isRunning) {
+      announcement = l10n.detectorReadyStatus;
+    } else if (detections.isNotEmpty) {
+      final uniqueLabels = detections
+          .map((d) => CocoLabels.getLocalizedLabel(d.label, langCode))
+          .toSet()
+          .join(', ');
+      announcement = '${l10n.detectorObjectsCount(detections.length)}: $uniqueLabels';
+    } else {
+      announcement = l10n.detectorObjectsCount(0);
     }
 
-    if (state == AppLifecycleState.inactive) {
+    // Synchronize announcement timer and label to avoid double-talkback from stream
+    _lastAnnouncementTime = DetectorPage.nowProvider();
+    if (detections.isNotEmpty) {
+      final topDetection = detections.reduce(
+        (max, d) => d.confidence >= max.confidence ? d : max,
+      );
+      _lastAnnouncedLabel = topDetection.label;
+    }
+
+    // ignore: deprecated_member_use
+    SemanticsService.announce(announcement, Directionality.of(context));
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
       _stopCameraStream();
-      controller.dispose();
-      _cameraController = null;
-      _isCameraInitialized = false;
+      final controller = _cameraController;
+      if (mounted) {
+        setState(() {
+          _isCameraInitialized = false;
+          _cameraController = null;
+        });
+      }
+      controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
+      if (mounted && (_cameraController == null || !_cameraController!.value.isInitialized)) {
+        _initializeCamera();
+      }
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _feedFocusNode.dispose();
     _stopCameraStream();
     _cameraController?.dispose();
     super.dispose();
@@ -185,9 +250,12 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
-          l10n.detectorScreenTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        title: Semantics(
+          header: true,
+          child: Text(
+            l10n.detectorScreenTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          ),
         ),
       ),
       body: BlocConsumer<DetectorCubit, DetectorState>(
@@ -208,7 +276,6 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
           final List<Detection> detections = state is DetectorResults
               ? state.detections
               : (state is DetectorPaused ? state.lastDetections : const []);
-          final int inferenceTimeMs = state is DetectorResults ? state.inferenceTimeMs : 0;
 
           // Localized Button Text and Semantics Label
           final String buttonLabel = isRunning
@@ -218,9 +285,7 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
           // Localized Status Badge Text
           final String statusText;
           if (isRunning) {
-            statusText = inferenceTimeMs > 0
-                ? l10n.detectorObjectsCountWithLatency(detections.length, inferenceTimeMs)
-                : l10n.detectorObjectsCount(detections.length);
+            statusText = l10n.detectorObjectsCount(detections.length);
           } else if (isPaused) {
             statusText = l10n.detectorPausedWithCount(detections.length);
           } else if (isIdle) {
@@ -229,12 +294,26 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
             statusText = l10n.statusError;
           }
 
+          // Construct unified, simplified accessible label that tells what objects are on screen
+          final String statusSemanticLabel;
+          if (isRunning && detections.isNotEmpty) {
+            final uniqueLabels = detections
+                .map((d) => CocoLabels.getLocalizedLabel(d.label, Localizations.localeOf(context).languageCode))
+                .toSet()
+                .join(', ');
+            statusSemanticLabel = '$statusText: $uniqueLabels';
+          } else if (!_isCameraInitialized && !isRunning && !isPaused) {
+            statusSemanticLabel = cameraDisplayError ?? l10n.detectorPlaceholderMessage;
+          } else {
+            statusSemanticLabel = statusText;
+          }
+
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Live Camera Viewport with Bounding Box Overlay & Semantics
+                // Live Camera Viewport with Focus and Tap-to-Announce
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -244,117 +323,130 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.black, width: 2),
                       ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (_isCameraInitialized && _cameraController != null) ...[
-                            // 1. Live Camera Preview with Localized Accessibility Label
-                            Semantics(
-                              label: l10n.cameraFeedSemantic,
-                              container: true,
-                              child: Center(
-                                child: CameraPreview(_cameraController!),
-                              ),
-                            ),
-
-                            // 2. Real-time Color-Coded Bounding Box Overlay (Exclude semantics to avoid focus traps)
-                            ExcludeSemantics(
-                              child: CustomPaint(
-                                painter: BoundingBoxPainter(
-                                  detections: detections,
-                                  previewSize: _cameraController!.value.previewSize,
-                                  languageCode: Localizations.localeOf(context).languageCode,
-                                ),
-                              ),
-                            ),
-                          ] else ...[
-                            // Camera Placeholder / Error State
-                            Semantics(
-                              label: cameraDisplayError ?? l10n.detectorPlaceholderMessage,
-                              container: true,
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.camera_alt_outlined,
-                                        size: 64,
-                                        color: Colors.white54,
+                      child: Focus(
+                        focusNode: _feedFocusNode,
+                        child: Semantics(
+                          container: true,
+                          focused: _feedFocusNode.hasFocus,
+                          label: statusSemanticLabel,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              _announceOnFeedTap(context, detections, isRunning, isPaused);
+                            },
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                if (_isCameraInitialized &&
+                                    _cameraController != null &&
+                                    _cameraController!.value.isInitialized) ...[
+                                  // 1. Live Camera Preview (Visual only, excluded from semantics)
+                                  ExcludeSemantics(
+                                    child: Center(
+                                      child: KeyedSubtree(
+                                        key: ValueKey(_cameraController),
+                                        child: CameraPreview(_cameraController!),
                                       ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        cameraDisplayError ?? l10n.detectorPlaceholderMessage,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
+                                    ),
+                                  ),
+
+                                  // 2. Real-time Color-Coded Bounding Box Overlay
+                                  ExcludeSemantics(
+                                    child: CustomPaint(
+                                      painter: BoundingBoxPainter(
+                                        detections: detections,
+                                        previewSize: _cameraController!.value.previewSize,
+                                        languageCode: Localizations.localeOf(context).languageCode,
+                                      ),
+                                    ),
+                                  ),
+                                ] else ...[
+                                  // Camera Placeholder / Error State (excluded since outer Semantics provides the label)
+                                  ExcludeSemantics(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24.0),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.camera_alt_outlined,
+                                              size: 64,
+                                              color: Colors.white54,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              cameraDisplayError ?? l10n.detectorPlaceholderMessage,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                  ),
+                                ],
+
+                                // HUD Status Badge (Visual for sighted users, excluded from semantics to prevent double speech)
+                                Positioned(
+                                  top: 16,
+                                  left: 16,
+                                  child: ExcludeSemantics(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withAlpha(210),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: Colors.white, width: 1.5),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              color: isRunning
+                                                  ? Colors.greenAccent
+                                                  : (isPaused ? Colors.amberAccent : Colors.white54),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            statusText,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-
-                          // HUD Status Badge (Driven by DetectorState with liveRegion semantics)
-                          Positioned(
-                            top: 16,
-                            left: 16,
-                            child: Semantics(
-                              container: true,
-                              liveRegion: true,
-                              label: statusText,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withAlpha(210),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white, width: 1.5),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: isRunning
-                                            ? Colors.greenAccent
-                                            : (isPaused ? Colors.amberAccent : Colors.white54),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      statusText,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // State-Driven Controls: Pause / Resume Button with localized Semantics
+                // State-Driven Controls: Pause / Resume Button (Clean single semantics node without nested duplicate speech)
                 ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 48),
                   child: Semantics(
                     button: true,
                     enabled: true,
                     label: buttonLabel,
+                    excludeSemantics: true,
                     child: ElevatedButton.icon(
                       icon: Icon(
                         isRunning
@@ -384,16 +476,10 @@ class _DetectorPageState extends State<DetectorPage> with WidgetsBindingObserver
                         final cubit = context.read<DetectorCubit>();
                         if (isRunning) {
                           cubit.pauseDetection();
-                          // ignore: deprecated_member_use
-                          SemanticsService.announce(l10n.pauseDetection, Directionality.of(context));
                         } else if (isPaused) {
                           cubit.resumeDetection();
-                          // ignore: deprecated_member_use
-                          SemanticsService.announce(l10n.resumeDetection, Directionality.of(context));
                         } else {
                           cubit.startDetection();
-                          // ignore: deprecated_member_use
-                          SemanticsService.announce(l10n.startDetection, Directionality.of(context));
                         }
                       },
                     ),

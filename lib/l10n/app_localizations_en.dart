@@ -256,11 +256,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analyzerErrorGeneric =>
-      'Unable to analyze image. Please try again.';
+      'Unable to recognize the scene. Please hold the camera steady and tap Retry.';
 
   @override
   String get analyzerErrorApiKey =>
-      'Gemini API key not found. Please add GEMINI_API_KEY to your .env file.';
+      'Vision recognition service is currently unavailable. Please tap Retry or try again in a moment.';
 
   @override
   String failedToCapturePhoto(String error) {
@@ -316,6 +316,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSection => 'User Profile';
+
+  @override
+  String get profileDialogSemantic => 'Profile Section';
+
+  @override
+  String get closeButton => 'Close';
 
   @override
   String get anonymousUser => 'Guest User';

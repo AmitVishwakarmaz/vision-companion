@@ -103,7 +103,7 @@ class GroqVisionService implements VisionService {
       throw const GroqAuthException('Groq API key not found. Please add GROQ_API_KEY to your .env file.');
     }
 
-    // Localized prompt tailored for assistive visual perception
+    // Localized prompt tailored for assistive visual perception with explicit tag generation
     final effectivePrompt = prompt ??
         (languageCode == 'hi'
             ? 'आप दृष्टिबाधित उपयोगकर्ताओं के लिए एक सहायक विज़न साथी हैं।\n'
@@ -111,13 +111,17 @@ class GroqVisionService implements VisionService {
               '1. प्राथमिक पहचान: सबसे पहले मुख्य वस्तु या दृश्य का नाम बताएं। यदि यह मुद्रा (नोट या सिक्का) है, तो मुद्रा और उसका मूल्य स्पष्ट बताएं (जैसे "यह भारतीय 500 रुपये का नोट है")।\n'
               '2. आवश्यक विवरण: रंग, छपे हुए प्रमुख शब्द या अंक, और आसपास का वातावरण बताएं।\n'
               '3. केवल वास्तविक दुनिया का विवरण: कैमरे के ओरिएंटेशन, फोटो के घूमने (जैसे "rotated 90 degrees") या तकनीकी पहलुओं का उल्लेख बिल्कुल न करें। सीधे सामने रखी वस्तु का वर्णन करें।\n'
-              '4. संपूर्णता: 2 से 3 पूरे और स्वाभाविक वाक्यों में जानकारी दें जो स्क्रीन रीडर द्वारा सुनने में सहज लगें। कभी भी वाक्य को अधूरा न छोड़ें।'
+              '4. संपूर्णता: 2 से 3 पूरे और स्वाभाविक वाक्यों में जानकारी दें जो स्क्रीन रीडर द्वारा सुनने में सहज लगें। कभी भी वाक्य को अधूरा न छोड़ें।\n'
+              '5. मुख्य वस्तु टैग: विवरण के अंत में एक नई पंक्ति पर मुख्य पहचानी गई वस्तु और श्रेणी इस प्रारूप में अवश्य लिखें:\n'
+              'Tags: <मुख्य वस्तु का नाम> (95%), <श्रेणी> (90%)'
             : 'You are an assistive vision companion helping a visually impaired user understand what is in front of them.\n'
               'Provide a clear, practical, and informative description:\n'
               '1. Primary identification: Immediately announce the main object or subject. If it is currency or money, clearly identify the currency name and denomination first (e.g. "An Indian 500-rupee banknote").\n'
               '2. Essential details: Mention key visual features, prominent colors, readable text or numbers, and the immediate background or surface.\n'
               '3. Avoid camera meta-commentary: Do NOT mention camera orientation, rotation angles (such as "rotated 90 degrees" or "vertical orientation"), or image framing. Focus purely on the actual physical object and scene.\n'
-              '4. Completeness: Provide 2 to 3 complete, natural, and helpful sentences suitable for text-to-speech announcement. Never end mid-sentence.');
+              '4. Completeness: Provide 2 to 3 complete, natural, and helpful sentences suitable for text-to-speech announcement. Never end mid-sentence.\n'
+              '5. Object tags: At the very end of your response on a new line, always provide the primary identified object and category in this format:\n'
+              'Tags: <primary_object_name> (95%), <category> (90%)');
 
     final requestPayload = {
       'model': model,

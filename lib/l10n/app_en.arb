@@ -279,11 +279,11 @@
   "@analyzerErrorNetwork": {
     "description": "Error message when network is unreachable"
   },
-  "analyzerErrorGeneric": "Unable to analyze image. Please try again.",
+  "analyzerErrorGeneric": "Unable to recognize the scene. Please hold the camera steady and tap Retry.",
   "@analyzerErrorGeneric": {
     "description": "Generic error message when analysis fails"
   },
-  "analyzerErrorApiKey": "Gemini API key not found. Please add GEMINI_API_KEY to your .env file.",
+  "analyzerErrorApiKey": "Vision recognition service is currently unavailable. Please tap Retry or try again in a moment.",
   "@analyzerErrorApiKey": {
     "description": "Error message when API key is missing"
   },
@@ -356,6 +356,14 @@
   "profileSection": "User Profile",
   "@profileSection": {
     "description": "Profile section title"
+  },
+  "profileDialogSemantic": "Profile Section",
+  "@profileDialogSemantic": {
+    "description": "Accessibility announcement when profile dialog opens"
+  },
+  "closeButton": "Close",
+  "@closeButton": {
+    "description": "Text and accessibility label for close button"
   },
   "anonymousUser": "Guest User",
   "@anonymousUser": {

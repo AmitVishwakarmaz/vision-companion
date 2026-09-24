@@ -10,7 +10,7 @@ abstract class DetectorService {
   Future<InferenceResult?> processCameraImage(
     CameraImage image, {
     int sensorOrientation = 90,
-    double confidenceThreshold = 0.45,
+    double confidenceThreshold = 0.50,
   });
   void dispose();
 }
@@ -49,7 +49,7 @@ class LiveDetectorService implements DetectorService {
   Future<InferenceResult?> processCameraImage(
     CameraImage image, {
     int sensorOrientation = 90,
-    double confidenceThreshold = 0.45,
+    double confidenceThreshold = 0.50,
   }) async {
     if (!_initialized || _isProcessing) {
       return null; // Skip frame to keep frame rate high and latency under 150ms

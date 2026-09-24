@@ -158,10 +158,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Description is displayed
+      // Description and header are displayed
       expect(find.text('A brown cat sitting quietly on a couch.'), findsOneWidget);
       expect(find.text('Scene Description'), findsOneWidget);
-      expect(find.text('142ms'), findsOneWidget);
+      // Milliseconds badge is removed for cleaner screen reader experience
+      expect(find.text('142ms'), findsNothing);
 
       // Result chips with confidence semantics: e.g. "Tag: cat, 94% confidence"
       expect(find.bySemanticsLabel('Tag: cat, 94% confidence'), findsOneWidget);

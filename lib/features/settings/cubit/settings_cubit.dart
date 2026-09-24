@@ -15,6 +15,12 @@ class SettingsCubit extends Cubit<SettingsState> {
     _loadPreferences();
   }
 
+  @override
+  void emit(SettingsState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   bool get hasSelectedLanguage =>
       prefs?.getBool(AppConstants.prefHasSelectedLanguage) ?? false;
 

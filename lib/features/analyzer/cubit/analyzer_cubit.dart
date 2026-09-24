@@ -25,6 +25,12 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
   })  : visionService = visionService ?? groqService ?? GeminiVisionService(),
         super(const AnalyzerIdle());
 
+  @override
+  void emit(AnalyzerState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   /// Initializes the analyzer and logs feature_opened to Analytics.
   void init() {
     analyticsService?.logFeatureOpened('image_analyzer');
@@ -43,11 +49,23 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
 
     final stopwatch = Stopwatch()..start();
 
-    // 1. Obtain API key safely from .env (checks GEMINI_API_KEY first, then GROQ_API_KEY)
+    // 1. Obtain API key safely (checks .env, assets/.env, and --dart-define)
+    if (!dotenv.isInitialized ||
+        ((dotenv.env['GEMINI_API_KEY']?.trim().isEmpty ?? true) &&
+         (dotenv.env['GROQ_API_KEY']?.trim().isEmpty ?? true))) {
+      try {
+        await dotenv.load(fileName: ".env");
+      } catch (_) {}
+    }
+
+    const envGemini = String.fromEnvironment('GEMINI_API_KEY');
+    const envGroq = String.fromEnvironment('GROQ_API_KEY');
+
     final rawKey = apiKeyOverride ??
         (apiKeyProvider != null ? apiKeyProvider!() : null) ??
-        dotenv.env['GEMINI_API_KEY'] ??
-        dotenv.env['GROQ_API_KEY'] ??
+        (envGemini.isNotEmpty ? envGemini : null) ??
+        (dotenv.isInitialized ? (dotenv.env['GEMINI_API_KEY'] ?? dotenv.env['GROQ_API_KEY']) : null) ??
+        (envGroq.isNotEmpty ? envGroq : null) ??
         '';
 
     final apiKey = _sanitizeApiKey(rawKey);
@@ -61,28 +79,53 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
     }
 
     try {
-      // 2. Perform AI Vision inference
-      final String rawDescription = await visionService.analyzeImage(
-        imagePath: imagePath,
-        apiKey: apiKey,
-        prompt: prompt,
-        languageCode: languageCode,
-        model: model,
-      );
+      // 2. Perform AI Vision inference with cross-provider failover
+      String rawDescription;
+      String usedModel = model ??
+          (visionService is GroqVisionService
+              ? GroqVisionService.defaultModel
+              : GeminiVisionService.defaultModel);
+      bool isGroq = visionService is GroqVisionService;
+
+      try {
+        rawDescription = await visionService.analyzeImage(
+          imagePath: imagePath,
+          apiKey: apiKey,
+          prompt: prompt,
+          languageCode: languageCode,
+          model: model,
+        );
+      } catch (primaryError) {
+        final groqKey = (dotenv.isInitialized ? dotenv.env['GROQ_API_KEY'] : null) ?? '';
+        final isRecoverableGeminiError = primaryError is GeminiRateLimitException ||
+            primaryError is GeminiNetworkException ||
+            (primaryError is GeminiApiException &&
+                (primaryError.statusCode == 503 || primaryError.statusCode == 429));
+
+        if (visionService is GeminiVisionService && isRecoverableGeminiError && groqKey.trim().isNotEmpty) {
+          debugPrint('Notice: Gemini overload/network error ($primaryError), falling back to Groq Vision...');
+          final groqService = GroqVisionService();
+          rawDescription = await groqService.analyzeImage(
+            imagePath: imagePath,
+            apiKey: groqKey,
+            prompt: prompt,
+            languageCode: languageCode,
+          );
+          usedModel = GroqVisionService.defaultModel;
+          isGroq = true;
+        } else {
+          rethrow;
+        }
+      }
 
       stopwatch.stop();
 
       final parsed = AnalysisData.parseWithTags(rawDescription);
 
-      final isGroq = visionService is GroqVisionService;
-      final defaultModelName = isGroq
-          ? GroqVisionService.defaultModel
-          : GeminiVisionService.defaultModel;
-
       final analysisData = AnalysisData(
         description: parsed.cleanDescription,
         imagePath: imagePath,
-        model: model ?? defaultModelName,
+        model: usedModel,
         latencyMs: stopwatch.elapsedMilliseconds,
         timestamp: DateTime.now(),
         tags: parsed.tags,
@@ -95,7 +138,7 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
           resultSummary: analysisData.description,
           metadata: {
             'source': isGroq ? 'groq_vision' : 'gemini_vision',
-            'model': model ?? defaultModelName,
+            'model': usedModel,
             'latencyMs': stopwatch.elapsedMilliseconds,
             'tags': analysisData.tags.map((t) => t.toMap()).toList(),
             'imagePath': File(imagePath).uri.pathSegments.isNotEmpty
@@ -137,7 +180,7 @@ class AnalyzerCubit extends Cubit<AnalyzerState> {
     } on GroqApiException catch (e) {
       emit(AnalyzerError(e.message, failedImagePath: imagePath));
     } catch (e) {
-      // Friendly user message with NO raw stack traces or technical details
+      debugPrint('AnalyzerCubit caught generic exception of type ${e.runtimeType}: $e');
       final friendlyMessage = (e is SocketException || e.toString().toLowerCase().contains('timeout'))
           ? 'Unable to analyze image. Please check your internet connection and try again.'
           : 'Unable to analyze image. Please try again.';

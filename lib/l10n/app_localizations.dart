@@ -443,13 +443,13 @@ abstract class AppLocalizations {
   /// Generic error message when analysis fails
   ///
   /// In en, this message translates to:
-  /// **'Unable to analyze image. Please try again.'**
+  /// **'Unable to recognize the scene. Please hold the camera steady and tap Retry.'**
   String get analyzerErrorGeneric;
 
   /// Error message when API key is missing
   ///
   /// In en, this message translates to:
-  /// **'Gemini API key not found. Please add GEMINI_API_KEY to your .env file.'**
+  /// **'Vision recognition service is currently unavailable. Please tap Retry or try again in a moment.'**
   String get analyzerErrorApiKey;
 
   /// Snackbar error message when camera capture fails
@@ -541,6 +541,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User Profile'**
   String get profileSection;
+
+  /// Accessibility announcement when profile dialog opens
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Section'**
+  String get profileDialogSemantic;
+
+  /// Text and accessibility label for close button
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeButton;
 
   /// Label for unauthenticated or guest user
   ///

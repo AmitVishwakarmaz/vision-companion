@@ -59,12 +59,16 @@ class AnalyzerError extends AnalyzerState {
     final lower = message.toLowerCase();
     if (lower.contains('internet') || lower.contains('network') || lower.contains('socket') || lower.contains('timeout')) {
       return l10n.analyzerErrorNetwork;
-    } else if (lower.contains('api key') || lower.contains('gemini_api_key') || lower.contains('not found')) {
+    } else if (lower.contains('api key') ||
+               lower.contains('gemini_api_key') ||
+               lower.contains('not found') ||
+               lower.contains('invalid') ||
+               lower.contains('unauthorized') ||
+               lower.contains('forbidden') ||
+               lower.contains('auth')) {
       return l10n.analyzerErrorApiKey;
-    } else if (lower.contains('unable to analyze')) {
-      return l10n.analyzerErrorGeneric;
     }
-    return message;
+    return l10n.analyzerErrorGeneric;
   }
 
   @override

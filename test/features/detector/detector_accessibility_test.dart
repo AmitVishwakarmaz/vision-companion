@@ -233,7 +233,7 @@ void main() {
       );
     });
 
-    testWidgets('Status badge has liveRegion and reflects detected objects with latency', (tester) async {
+    testWidgets('Status badge reflects detected objects with latency', (tester) async {
       final detectorCubit = MockDetectorCubit(DetectorResults(
         detections: [
           Detection(
@@ -259,15 +259,14 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Status text displays "2 objects | 42ms"
-      expect(find.text('2 objects | 42ms'), findsOneWidget);
+      // Status text displays "2 objects detected"
+      expect(find.text('2 objects detected'), findsOneWidget);
 
-      // Status badge has liveRegion: true semantics
+      // Status badge has accessible semantics label combining count and detected objects
       expect(
         find.byWidgetPredicate((w) =>
             w is Semantics &&
-            w.properties.liveRegion == true &&
-            w.properties.label == '2 objects | 42ms'),
+            w.properties.label == '2 objects detected: person, dog'),
         findsOneWidget,
       );
     });
@@ -458,6 +457,51 @@ void main() {
       );
 
       expect(painterHi.shouldRepaint(painterEn), isTrue);
+    });
+
+    testWidgets('Tapping live feed requests focus and triggers clean announcement', (tester) async {
+      final announcements = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility,
+        (dynamic message) async {
+          if (message is Map && message['type'] == 'announce') {
+            final data = message['data'] as Map?;
+            if (data != null && data['message'] is String) {
+              announcements.add(data['message'] as String);
+            }
+          }
+          return null;
+        },
+      );
+
+      final detectorCubit = MockDetectorCubit(DetectorResults(
+        detections: [
+          Detection(
+            label: 'dog',
+            confidence: 0.90,
+            classId: 16,
+            boundingBox: const Rect.fromLTWH(0.1, 0.1, 0.4, 0.4),
+          ),
+        ],
+        inferenceTimeMs: 25,
+      ));
+      final settingsCubit = MockSettingsCubit(const SettingsState(locale: Locale('en'), themeMode: ThemeMode.light));
+
+      await tester.pumpWidget(buildTestableDetectorPage(
+        detectorCubit: detectorCubit,
+        settingsCubit: settingsCubit,
+      ));
+      await tester.pumpAndSettle();
+
+      announcements.clear();
+
+      // Tap on live camera feed viewport
+      await tester.tap(find.byType(GestureDetector).first);
+      await tester.pump();
+
+      // Live feed should request and hold focus, and announce detected objects
+      expect(announcements, hasLength(1));
+      expect(announcements.first, equals('1 object detected: dog'));
     });
   });
 }

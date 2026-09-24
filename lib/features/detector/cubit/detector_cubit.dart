@@ -67,12 +67,18 @@ class DetectorCubit extends Cubit<DetectorState> {
     emit(const DetectorStopped());
   }
 
+  @override
+  void emit(DetectorState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   /// Feeds a camera frame from CameraController.startImageStream into the background isolate.
   Future<void> processCameraImage(
     CameraImage image, {
     int sensorOrientation = 90,
   }) async {
-    if (state is! DetectorRunning && state is! DetectorResults) {
+    if (isClosed || (state is! DetectorRunning && state is! DetectorResults)) {
       return;
     }
 
@@ -87,6 +93,8 @@ class DetectorCubit extends Cubit<DetectorState> {
         image,
         sensorOrientation: sensorOrientation,
       );
+
+      if (isClosed) return;
 
       if (result != null && (state is DetectorRunning || state is DetectorResults)) {
         emit(DetectorResults(
@@ -124,7 +132,9 @@ class DetectorCubit extends Cubit<DetectorState> {
         }
       }
     } catch (e) {
-      emit(DetectorError('Inference error: $e'));
+      if (!isClosed) {
+        emit(DetectorError('Inference error: $e'));
+      }
     } finally {
       _isProcessingFrame = false;
     }
@@ -186,6 +196,7 @@ class DetectorCubit extends Cubit<DetectorState> {
 
   @override
   Future<void> close() {
+    _isProcessingFrame = false;
     detectorService?.dispose();
     return super.close();
   }

@@ -257,11 +257,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get analyzerErrorGeneric =>
-      'छवि का विश्लेषण करने में असमर्थ। कृपया पुनः प्रयास करें।';
+      'दृश्य को पहचानने में असमर्थ। कृपया कैमरा स्थिर रखें और पुनः प्रयास करें।';
 
   @override
   String get analyzerErrorApiKey =>
-      'Gemini API कुंजी नहीं मिली। कृपया अपने .env फ़ाइल में GEMINI_API_KEY जोड़ें।';
+      'विज़न पहचान सेवा वर्तमान में अनुपलब्ध है। कृपया \'पुनः प्रयास करें\' पर टैप करें या थोड़ी देर बाद प्रयास करें।';
 
   @override
   String failedToCapturePhoto(String error) {
@@ -318,6 +318,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get profileSection => 'उपयोगकर्ता प्रोफ़ाइल';
+
+  @override
+  String get profileDialogSemantic => 'प्रोफ़ाइल अनुभाग';
+
+  @override
+  String get closeButton => 'बंद करें';
 
   @override
   String get anonymousUser => 'अतिथि उपयोगकर्ता';

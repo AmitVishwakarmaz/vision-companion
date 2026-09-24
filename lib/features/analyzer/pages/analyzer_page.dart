@@ -19,6 +19,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   String? _cameraErrorMessage;
+  final FocusNode _resultFocusNode = FocusNode();
+  final FocusNode _errorFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -61,11 +63,15 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
         return;
       }
 
-      setState(() {
-        _cameraController = controller;
-        _isCameraInitialized = true;
-        _cameraErrorMessage = null;
-      });
+      final oldController = _cameraController;
+      if (mounted) {
+        setState(() {
+          _cameraController = controller;
+          _isCameraInitialized = true;
+          _cameraErrorMessage = null;
+        });
+      }
+      oldController?.dispose();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -77,15 +83,19 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final controller = _cameraController;
-    if (controller == null || !controller.value.isInitialized) return;
-
-    if (state == AppLifecycleState.inactive) {
-      controller.dispose();
-      _cameraController = null;
-      _isCameraInitialized = false;
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      final controller = _cameraController;
+      if (mounted) {
+        setState(() {
+          _isCameraInitialized = false;
+          _cameraController = null;
+        });
+      }
+      controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
+      if (mounted && (_cameraController == null || !_cameraController!.value.isInitialized)) {
+        _initializeCamera();
+      }
     }
   }
 
@@ -93,6 +103,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cameraController?.dispose();
+    _resultFocusNode.dispose();
+    _errorFocusNode.dispose();
     super.dispose();
   }
 
@@ -149,19 +161,37 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
           } else if (state is AnalyzerError) {
             HapticFeedback.heavyImpact().catchError((_) {});
             final localizedMsg = state.getLocalizedMessage(l10n);
-            // TalkBack announcement for screen readers
-            // ignore: deprecated_member_use
-            SemanticsService.announce(localizedMsg, Directionality.of(context));
-
-            // Display simple, accessible error pop-up dialog
-            _showErrorPopup(context, localizedMsg, state.failedImagePath, langCode, l10n);
+            final direction = Directionality.of(context);
+            final announcement =
+                '${l10n.errorDialogTitle}: $localizedMsg. ${l10n.retryButton} or ${l10n.captureAnotherButton}.';
+            // Settle post-frame, request focus on error node, and announce cleanly
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _errorFocusNode.requestFocus();
+              Future.delayed(const Duration(milliseconds: 300), () {
+                if (!mounted) return;
+                // ignore: deprecated_member_use
+                SemanticsService.announce(announcement, direction);
+              });
+            });
           } else if (state is AnalyzerResult) {
             HapticFeedback.lightImpact().catchError((_) {});
+            final direction = Directionality.of(context);
             final tagsText = state.data.tags.isNotEmpty
                 ? ' ${state.data.tags.map((t) => l10n.analyzerTagSemantic(t.label, t.formattedConfidence)).join('. ')}.'
                 : '';
-            // ignore: deprecated_member_use
-            SemanticsService.announce('${state.description}$tagsText', Directionality.of(context));
+            final announcement =
+                '${l10n.analysisResultTitle}: ${state.description}.$tagsText ${l10n.captureAnotherButton}.';
+            // Settle post-frame, request focus on result node, and announce full description + action
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _resultFocusNode.requestFocus();
+              Future.delayed(const Duration(milliseconds: 300), () {
+                if (!mounted) return;
+                // ignore: deprecated_member_use
+                SemanticsService.announce(announcement, direction);
+              });
+            });
           }
         },
         builder: (context, state) {
@@ -188,10 +218,17 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                         fit: StackFit.expand,
                         children: [
                           // 1. Live Camera Preview (when idle and camera available)
-                          if (!isResult && !isError && _isCameraInitialized && _cameraController != null)
+                          if (!isResult &&
+                              !isError &&
+                              _isCameraInitialized &&
+                              _cameraController != null &&
+                              _cameraController!.value.isInitialized)
                             Semantics(
                               label: l10n.analyzerCameraFeedSemantic,
-                              child: CameraPreview(_cameraController!),
+                              child: KeyedSubtree(
+                                key: ValueKey(_cameraController),
+                                child: CameraPreview(_cameraController!),
+                              ),
                             ),
 
                           // 2. Uninitialized / Error Camera Placeholder
@@ -267,59 +304,70 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                 children: [
                                   // Optional thumbnail preview if local image file exists
                                   if (File(state.data.imagePath).existsSync())
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: SizedBox(
-                                        height: 160,
-                                        width: double.infinity,
-                                        child: Image.file(
-                                          File(state.data.imagePath),
-                                          fit: BoxFit.cover,
+                                    ExcludeSemantics(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: SizedBox(
+                                          height: 160,
+                                          width: double.infinity,
+                                          child: Image.file(
+                                            File(state.data.imagePath),
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   const SizedBox(height: 16),
 
-                                  // Header with Model Badge
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.auto_awesome,
-                                        color: Colors.black,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        l10n.analysisResultTitle,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      if (state.data.latencyMs > 0)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade200,
-                                            borderRadius: BorderRadius.circular(12),
+                                  // Header with Model Badge & full description in semantics
+                                  Focus(
+                                    focusNode: _resultFocusNode,
+                                    child: Semantics(
+                                      header: true,
+                                      liveRegion: true,
+                                      label: '${l10n.analysisResultTitle}: ${state.data.description}',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.auto_awesome,
+                                            color: Colors.black,
+                                            size: 20,
                                           ),
-                                          child: Text(
-                                            '${state.data.latencyMs}ms',
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            l10n.analysisResultTitle,
                                             style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black87,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
                                             ),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Scrollable AI Description (visual presentation)
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      child: ExcludeSemantics(
+                                        child: Text(
+                                          state.data.description,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            height: 1.5,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.normal,
+                                          ),
                                         ),
-                                    ],
+                                      ),
+                                    ),
                                   ),
 
                                   // Result Chips (Tags with confidence, e.g. "Tag: cat, 94% confidence")
                                   if (state.data.tags.isNotEmpty) ...[
-                                    const SizedBox(height: 10),
+                                    const Divider(height: 16, thickness: 1),
                                     Wrap(
                                       spacing: 8,
                                       runSpacing: 6,
@@ -351,55 +399,44 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                                       }).toList(),
                                     ),
                                   ],
-                                  const Divider(height: 20, thickness: 1),
-
-                                  // Scrollable AI Description
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      child: Semantics(
-                                        label: state.data.description,
-                                        child: Text(
-                                          state.data.description,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            height: 1.5,
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
 
-                          // 5. Friendly Error Display (No Raw Stack Traces)
+                          // 5. Friendly Error Display (No Raw Stack Traces, Screen Reader Live Region)
                           if (isError)
-                            Container(
-                              color: Colors.white,
-                              padding: const EdgeInsets.all(24.0),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline_rounded,
-                                      size: 56,
-                                      color: Colors.redAccent,
+                            Focus(
+                              focusNode: _errorFocusNode,
+                              child: Semantics(
+                                container: true,
+                                liveRegion: true,
+                                label: '${l10n.errorDialogTitle}: ${state.getLocalizedMessage(l10n)}',
+                                child: Container(
+                                  color: Colors.white,
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.error_outline_rounded,
+                                          size: 56,
+                                          color: Colors.redAccent,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          state.getLocalizedMessage(l10n),
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      state.getLocalizedMessage(l10n),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -451,24 +488,29 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                       Expanded(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(minHeight: 48),
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.black, width: 1.5),
-                              minimumSize: const Size.fromHeight(52),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                          child: Semantics(
+                            button: true,
+                            label: l10n.captureAnotherButton,
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.camera_alt_outlined, color: Colors.black),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.black, width: 1.5),
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              HapticFeedback.selectionClick().catchError((_) {});
-                              context.read<AnalyzerCubit>().reset();
-                            },
-                            child: Text(
-                              l10n.captureAnotherButton,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black,
+                              onPressed: () {
+                                HapticFeedback.selectionClick().catchError((_) {});
+                                context.read<AnalyzerCubit>().reset();
+                              },
+                              label: Text(
+                                l10n.captureAnotherButton,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
                           ),
@@ -480,28 +522,32 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
                   // Result Controls: Take Another Photo
                   ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 48),
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.camera_alt_outlined, color: Colors.white),
-                      label: Text(
-                        l10n.captureAnotherButton,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.white,
+                    child: Semantics(
+                      button: true,
+                      label: l10n.captureAnotherButton,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.camera_alt_outlined, color: Colors.white),
+                        label: Text(
+                          l10n.captureAnotherButton,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(52),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
+                        onPressed: () {
+                          HapticFeedback.selectionClick().catchError((_) {});
+                          context.read<AnalyzerCubit>().reset();
+                        },
                       ),
-                      onPressed: () {
-                        HapticFeedback.selectionClick().catchError((_) {});
-                        context.read<AnalyzerCubit>().reset();
-                      },
                     ),
                   )
                 else
@@ -542,111 +588,6 @@ class _AnalyzerPageState extends State<AnalyzerPage> with WidgetsBindingObserver
           );
         },
       ),
-    );
-  }
-
-  /// Displays a simple, accessible error pop-up dialog with TalkBack and Semantics support.
-  void _showErrorPopup(
-    BuildContext context,
-    String message,
-    String? failedImagePath,
-    String langCode,
-    AppLocalizations l10n,
-  ) {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        return Semantics(
-          label: '${l10n.errorDialogTitle}: $message',
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            icon: const Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: Colors.redAccent,
-            ),
-            title: Text(
-              l10n.errorDialogTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
-            content: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black87,
-                height: 1.4,
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            actions: [
-              // Dismiss button
-              Semantics(
-                button: true,
-                label: l10n.errorDialogDismiss,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48, minWidth: 100),
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: Colors.black, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      HapticFeedback.selectionClick().catchError((_) {});
-                      Navigator.of(dialogContext).pop();
-                      context.read<AnalyzerCubit>().reset();
-                    },
-                    child: Text(
-                      l10n.errorDialogDismiss,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Retry button
-              Semantics(
-                button: true,
-                label: l10n.retryButtonSemantic,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48, minWidth: 100),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      HapticFeedback.selectionClick().catchError((_) {});
-                      Navigator.of(dialogContext).pop();
-                      context.read<AnalyzerCubit>().retry(languageCode: langCode);
-                    },
-                    child: Text(
-                      l10n.retryButton,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

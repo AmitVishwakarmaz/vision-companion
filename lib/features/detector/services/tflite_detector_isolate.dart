@@ -49,7 +49,7 @@ class _InferenceCommand {
 
   const _InferenceCommand({
     required this.frame,
-    this.confidenceThreshold = 0.45,
+    this.confidenceThreshold = 0.50,
   });
 }
 
@@ -238,7 +238,7 @@ class TFLiteDetectorIsolate {
     });
   }
 
-  /// Fast nearest-neighbor subsampling from YUV420 to RGB [300 x 300 x 3].
+  /// Fast subsampling from YUV420 to RGB [300 x 300 x 3] with orientation handling.
   static void _convertYUV420ToRgb300(FrameData frame, Uint8List outRgb, int targetSize) {
     final yPlane = frame.yPlane;
     final uPlane = frame.uPlane;
@@ -249,21 +249,36 @@ class TFLiteDetectorIsolate {
     final yRowStride = frame.yRowStride;
     final uvRowStride = frame.uvRowStride;
     final uvPixelStride = frame.uvPixelStride;
+    final orientation = frame.sensorOrientation;
 
     final hasUV = uPlane != null && vPlane != null;
 
     int outIndex = 0;
     for (int y = 0; y < targetSize; y++) {
-      final srcY = (y * srcHeight) ~/ targetSize;
-      final yOffset = srcY * yRowStride;
-      final uvOffset = (srcY >> 1) * uvRowStride;
-
       for (int x = 0; x < targetSize; x++) {
-        final srcX = (x * srcWidth) ~/ targetSize;
+        int srcX;
+        int srcY;
+
+        if (orientation == 90) {
+          srcX = (y * srcWidth) ~/ targetSize;
+          srcY = ((targetSize - 1 - x) * srcHeight) ~/ targetSize;
+        } else if (orientation == 270) {
+          srcX = ((targetSize - 1 - y) * srcWidth) ~/ targetSize;
+          srcY = (x * srcHeight) ~/ targetSize;
+        } else {
+          srcX = (x * srcWidth) ~/ targetSize;
+          srcY = (y * srcHeight) ~/ targetSize;
+        }
+
+        srcX = srcX.clamp(0, srcWidth - 1);
+        srcY = srcY.clamp(0, srcHeight - 1);
+
+        final yOffset = srcY * yRowStride;
         final yVal = yPlane[yOffset + srcX];
 
         int r, g, b;
         if (hasUV) {
+          final uvOffset = (srcY >> 1) * uvRowStride;
           final uvIndex = uvOffset + ((srcX >> 1) * uvPixelStride);
           final uVal = uPlane[uvIndex] - 128;
           final vVal = vPlane[uvIndex] - 128;
