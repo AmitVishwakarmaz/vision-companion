@@ -259,8 +259,6 @@ service cloud.firestore {
 }
 ```
 
-> **Note:** the sample rules in the current `README.md` match a top-level `/history/{document=**}` collection, which does **not** match the app's `users/{uid}/history` path — writes would be denied. Use the rules above.
-
 If you later query history with a `featureType` filter, Firestore will prompt you to create a composite index (`featureType` + `timestamp` desc); follow the link in the error message.
 
 ### 4.6 Crashlytics and Analytics
