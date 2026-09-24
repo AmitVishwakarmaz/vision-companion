@@ -88,7 +88,6 @@ The application supports:
 
 - Email and password authentication
 - Google Sign-In
-- Guest/anonymous sign-in
 
 **Technology:** Firebase Authentication, Google Sign-In.
 
